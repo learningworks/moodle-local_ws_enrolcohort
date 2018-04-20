@@ -30,6 +30,7 @@ global $CFG;
 require_once("$CFG->libdir/externallib.php");
 
 use \local_ws_enrolcohort\tools as tools;
+use \local_ws_enrolcohort\responses as responses;
 
 class local_ws_enrolcohort_external extends external_api {
     /**
@@ -122,9 +123,9 @@ class local_ws_enrolcohort_external extends external_api {
         $courseid = $params['params']['courseid'];
 
         if ($courseid == $SITE->id) {
-            $errors[] = self::generate_error('course', $courseid, 'courseissite');
+            $errors[] = (new responses\error($courseid, 'course', 'courseissite'))->to_array();
         } else if (!$DB->record_exists('course', ['id' => $courseid])) {
-            $errors[] = self::generate_error('course', $courseid, 'coursenotexists');
+            $errors[] = (new responses\error($courseid, 'course', 'coursenotexists'))->to_array();
         }
 
         // Get the cohort.
@@ -159,7 +160,7 @@ class local_ws_enrolcohort_external extends external_api {
         return $response;
     }
 
-    private static function generate_error($object = '', $id = 0, $identifier = '') {
+    private static function generate_error_response($object = '', $id = 0, $identifier = '') {
         return [
             'object'    => $object,
             'id'        => $id,

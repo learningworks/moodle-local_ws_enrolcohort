@@ -15,12 +15,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Definition of language strings.
+ * Strings for language 'en' for local_ws_enrolcohort.
  *
- * @package     local_wcws {@link https://docs.moodle.org/dev/Frankenstyle}
- * @copyright   2017 LearningWorks Ltd {@link http://www.learningworks.co.nz}
+ * @package     local_ws_enrolcohort
+ * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
+ * @copyright   2018 onwards, LearningWorks ltd
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// No direct access.
+defined('MOODLE_INTERNAL') || die();
 
+// Default langstring.
 $string['pluginname'] = 'Extended enrol cohort webservices';
+
+// Strings for errors.
+$string['coursenotexists']  = 'Course does not exist.';
+$string['courseissite']     = 'Can not add instance to the site course.';

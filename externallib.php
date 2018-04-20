@@ -29,6 +29,8 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once("$CFG->libdir/externallib.php");
 
+use \local_ws_enrolcohort\tools as tools;
+
 class local_ws_enrolcohort_external extends external_api {
     /**
      * Returns description of the add_instance function parameters.
@@ -54,21 +56,46 @@ class local_ws_enrolcohort_external extends external_api {
     /**
      * Returns description of the add_instance function return value.
      *
-     * @return external_description
+     * @return external_single_structure
      */
     public static function add_instance_returns() {
-        return new external_multiple_structure(
-            new external_single_structure(
-                [
-                    'id'        => new external_value(PARAM_INT, 'enrolment instance id'),
-                    'courseid'  => new external_value(PARAM_INT, 'course id'),
-                    'cohortid'  => new external_value(PARAM_INT, 'cohort id'),
-                    'roleid'    => new external_value(PARAM_INT, 'role id'),
-                    'groupid'   => new external_value(PARAM_INT, 'group id'),
-                    'name'      => new external_value(PARAM_TEXT, 'enrolment instance name'),
-                    'status'    => new external_value(PARAM_BOOL, 'enrolment instance enabled')
-                ]
-            )
+        return new external_single_structure(
+            [
+                'id'        => new external_value(PARAM_INT, 'enrolment instance id'),
+                'code'      => new external_value(PARAM_INT, 'http status code'),
+                'message'   => new external_value(PARAM_TEXT, 'human readable response message'),
+                'errors'    => new external_multiple_structure(
+                    new external_single_structure(
+                        [
+                            'object'    => new external_value(PARAM_TEXT, 'the object that failed'),
+                            'id'        => new external_value(PARAM_INT, 'the id of the failed object'),
+                            'message'   => new external_value(PARAM_TEXT, 'human readable response message')
+                        ],
+                        'component errors',
+                        VALUE_OPTIONAL
+                    )
+                ),
+                'data' => new external_multiple_structure(
+                    new external_single_structure(
+                        [
+                            'object'    => new external_value(PARAM_TEXT, 'the object this is describing'),
+                            'id'        => new external_value(PARAM_INT, 'the id of the object', VALUE_OPTIONAL),
+                            'name'      => new external_value(PARAM_TEXT, 'the name of the object'),
+                            'courseid'  => new external_value(PARAM_INT, 'the id of the related course', VALUE_OPTIONAL),
+                            'cohortid'  => new external_value(PARAM_INT, 'the id of the cohort', VALUE_OPTIONAL),
+                            'roleid'    => new external_value(PARAM_INT, 'the id of the related role', VALUE_OPTIONAL),
+                            'groupid'   => new external_value(PARAM_INT, 'the id of the group', VALUE_OPTIONAL),
+                            'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
+                            'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
+                            'status'    => new external_value(PARAM_BOOL, 'the status of the object', VALUE_OPTIONAL),
+                            'visible'   => new external_value(PARAM_BOOL, 'the visibility of the object', VALUE_OPTIONAL),
+                            'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
+                        ],
+                        'extra details',
+                        VALUE_OPTIONAL
+                    )
+                )
+            ]
         );
     }
 
@@ -78,23 +105,65 @@ class local_ws_enrolcohort_external extends external_api {
      * @param $params
      * @return array
      * @throws invalid_parameter_exception
+     * @throws dml_exception
      */
     public static function add_instance($params) {
+        global $DB, $SITE;
+
         $params = self::validate_parameters(self::add_instance_parameters(), ['params' => $params]);
 
+        // In case of errors.
+        $errors = [];
+
+        // Other data.
+        $extradata = [];
+
+        // Get the course.
+        $courseid = $params['params']['courseid'];
+
+        if ($courseid == $SITE->id) {
+            $errors[] = self::generate_error('course', $courseid, 'courseissite');
+        } else if (!$DB->record_exists('course', ['id' => $courseid])) {
+            $errors[] = self::generate_error('course', $courseid, 'coursenotexists');
+        }
+
+        // Get the cohort.
+        $cohortid = $params['params']['cohortid'];
+
+        // Get the role.
+        $roleid = $params['params']['roleid'];
+
+        // Get the group.
+        $groupid = $params['params']['groupid'];
+
+        // The name of the cohort enrolment instance.
+        $name = $params['params']['name'];
+
+        // The status of the enrolment instance.
+        $status = $params['params']['status'];
+
+        $extradata[] = ['object' => 'params', 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid, 'name' => $name, 'status' => $status];
+
+        // Set the HTTP status code.
+        $code = empty($errors) ? 200 : 400;
+
         // Return some test data.
-        $data = [
-            [
-                'id'        => 1,
-                'courseid'  => 2,
-                'cohortid'  => 3,
-                'roleid'    => 4,
-                'groupid'   => 5,
-                'name'      => json_encode($params),
-                'status'    => true
-            ]
+        $response = [
+            'id'        => 1,
+            'code'      => $code,
+            'message'   => 'message',
+            'errors'    => $errors,
+            'data'      => $extradata
         ];
 
-        return $data;
+        return $response;
+    }
+
+    private static function generate_error($object = '', $id = 0, $identifier = '') {
+        return [
+            'object'    => $object,
+            'id'        => $id,
+            'message'   => tools::get_string($identifier)
+        ];
     }
 }

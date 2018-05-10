@@ -270,7 +270,8 @@ class local_ws_enrolcohort_external extends external_api {
             'cohortid'  => $cohortid,
             'roleid'    => $roleid,
             'groupid'   => $groupid,
-            'name'      => $name
+            'name'      => $name,
+            'status'    => $status
         ];
 
         // Set the HTTP status code.
@@ -297,7 +298,20 @@ class local_ws_enrolcohort_external extends external_api {
         // Get the full course object.
         $course = $DB->get_record('course', ['id' => $courseid]);
 
-        $response['id'] = 1;
+        // Prepare the fields.
+        $fields = [
+            'name'              => $name,
+            'status'            => $status,
+            'roleid'            => $roleid,
+            'id'                => 0,
+            'courseid'          => $courseid,
+            'type'              => 'cohort',
+            self::FIELD_COHORT  => $cohortid,
+            self::FIELD_GROUP   => $groupid
+        ];
+
+        // After all that hard work we can now add the instance.
+        $response['id'] = $cohortenrolment->add_instance($course, $fields);
 
         // Return some data.
         return $response;

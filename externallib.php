@@ -129,7 +129,7 @@ class local_ws_enrolcohort_external extends external_api {
                             'groupid'   => new external_value(PARAM_INT, 'the id of the group', VALUE_OPTIONAL),
                             'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
                             'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
-                            'status'    => new external_value(PARAM_BOOL, 'the status of the object', VALUE_OPTIONAL),
+                            'status'    => new external_value(PARAM_INT, 'the status of the object', VALUE_OPTIONAL),
                             'visible'   => new external_value(PARAM_BOOL, 'the visibility of the object', VALUE_OPTIONAL),
                             'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
                         ],
@@ -309,6 +309,27 @@ class local_ws_enrolcohort_external extends external_api {
             self::FIELD_COHORT  => $cohortid,
             self::FIELD_GROUP   => $groupid
         ];
+
+        // Before creation ensure that there isn't an instance already synced with this role.
+        $sqlwhere = "roleid = :roleid AND customint1 = :customint1 AND courseid = :courseid AND enrol = 'cohort' AND id <> :id";
+        $sqlparams = [
+            'roleid'            => $roleid,
+            self::FIELD_COHORT  => $cohortid,
+            'courseid'          => $courseid,
+            'id'                => $fields['id']
+        ];
+
+        if ($DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
+            // Don't add instance. Send an error response.
+            $errors[] = (new responses\error($DB->get_field_select('enrol', 'id', $sqlwhere, $sqlparams), 'instance', 'instanceexists'))->to_array();
+
+            $response['id']         = $fields['id'];
+            $response['code']       = 400;
+            $response['errors']     = $errors;
+            $response['message']    = tools::get_string("addinstance:{$response['code']}");
+
+            return $response;
+        }
 
         // After all that hard work we can now add the instance.
         $response['id'] = $cohortenrolment->add_instance($course, $fields);

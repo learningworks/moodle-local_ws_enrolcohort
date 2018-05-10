@@ -54,6 +54,9 @@ $string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
 // Strings for errors - status.
 $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
 
+// Strings for errors - instance.
+$string['instanceexists'] = 'Cohort is already synchronised with selected role.';
+
 // Strings for webservice function add_instance return messages.
 $string['addinstance:200']  = 'Cohort enrolment instance added.';
 $string['addinstance:400']  = 'Could not add cohort enrolment instance.';

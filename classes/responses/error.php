@@ -34,9 +34,9 @@ class error extends response {
 
     protected $message;
 
-    public function __construct($id = 0, $object = '', $identifier = '') {
+    public function __construct($id = 0, $object = '', $identifier = '', $langstringplaceholder = null) {
         parent::__construct($id, $object);
-        $this->message = tools::get_string($identifier);
+        $this->message = tools::get_string($identifier, $langstringplaceholder);
     }
 
     public function get_response() {

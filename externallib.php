@@ -33,6 +33,28 @@ use \local_ws_enrolcohort\tools as tools;
 use \local_ws_enrolcohort\responses as responses;
 
 class local_ws_enrolcohort_external extends external_api {
+
+    /**
+     * A constant that defines the query strings i.e. https://example.url?querystring[key]=value&querystring[key]=value etcera, etcetera.
+     */
+    const QUERYSTRING_IDENTIFIER = 'instance';
+
+    /**
+     * A constant that defines a webservice function call that has errors.
+     */
+    const WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID = -1;
+
+    /**
+     * Gets the default value for a parameter. Use properly. No error checking happens.
+     *
+     * @param string $querystringvalue
+     * @return mixed
+     */
+    private static function add_instance_get_parameter_default_value($querystringvalue = '') {
+        // Just ask for the right things and one shall receive. We shan't be making any mistakes.
+        return self::add_instance_parameters()->keys[self::QUERYSTRING_IDENTIFIER]->keys[$querystringvalue]->default;
+    }
+
     /**
      * Returns description of the add_instance function parameters.
      *
@@ -41,11 +63,11 @@ class local_ws_enrolcohort_external extends external_api {
     public static function add_instance_parameters() {
         return new external_function_parameters(
             [
-                'params' => new external_single_structure(
+                self::QUERYSTRING_IDENTIFIER => new external_single_structure(
                     [
                         'courseid'  => new external_value(PARAM_INT, 'The id of the course.', VALUE_REQUIRED),
                         'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort.', VALUE_REQUIRED),
-                        'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL, 0),
+                        'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED),
                         'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, 0),
                         'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL)
                     ]
@@ -105,13 +127,17 @@ class local_ws_enrolcohort_external extends external_api {
      *
      * @param $params
      * @return array
-     * @throws invalid_parameter_exception
+     * @throws coding_exception
      * @throws dml_exception
+     * @throws invalid_parameter_exception
      */
     public static function add_instance($params) {
-        global $DB, $SITE;
+        global $CFG, $DB, $SITE;
 
-        $params = self::validate_parameters(self::add_instance_parameters(), ['params' => $params]);
+        require_once("{$CFG->dirroot}/cohort/lib.php");
+
+        // Check the call for parameters.
+        $params = self::validate_parameters(self::add_instance_parameters(), [self::QUERYSTRING_IDENTIFIER => $params]);
 
         // In case of errors.
         $errors = [];
@@ -120,51 +146,126 @@ class local_ws_enrolcohort_external extends external_api {
         $extradata = [];
 
         // Get the course.
-        $courseid = $params['params']['courseid'];
+        $courseid = $params[self::QUERYSTRING_IDENTIFIER]['courseid'];
 
+        // Initial context.
+        $context = null;
+
+        // Validate the course. This is required.
         if ($courseid == $SITE->id) {
             $errors[] = (new responses\error($courseid, 'course', 'courseissite'))->to_array();
+
+            // Set the context to system for validation.
+            $context = \context_system::instance();
         } else if (!$DB->record_exists('course', ['id' => $courseid])) {
             $errors[] = (new responses\error($courseid, 'course', 'coursenotexists'))->to_array();
+        } else {
+            // Set the context to course for validation.
+            $context = \context_course::instance($courseid);
         }
 
-        // Get the cohort.
-        $cohortid = $params['params']['cohortid'];
+        // Get the cohort. This is required
+        $cohortid = $params[self::QUERYSTRING_IDENTIFIER]['cohortid'];
+
+        // Validate the cohort. This is required.
+        if (!$DB->record_exists('cohort', ['id' => $cohortid])) {
+            $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotexists'))->to_array();
+        } else if ($context instanceof \context_system) {
+            $errors[] = (new responses\error($cohortid, 'cohortsite', 'cohortnotavailableatcontext'))->to_array();
+        } else if ($context instanceof \context_course) {
+            $availablecohorts = cohort_get_available_cohorts($context);
+            if (empty($availablecohorts) || !isset($availablecohorts[$cohortid])) {
+                $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotavailableatcontext'))->to_array();
+            }
+        }
 
         // Get the role.
-        $roleid = $params['params']['roleid'];
+        $roleid = $params[self::QUERYSTRING_IDENTIFIER]['roleid'];
+
+        // Validate the role. This is required.
+        $assignableroles = $context instanceof \context_course ? get_assignable_roles($context) : [];
+
+        if (!$DB->record_exists('role', ['id' => $roleid])) {
+            // Role doesn't exist.
+            $errors[] = (new responses\error($roleid, 'role', 'rolenotexists'))->to_array();
+        } else if (empty($assignableroles) || !isset($assignableroles[$roleid])) {
+            // Role is not assignable at this context.
+            $errors[] = (new responses\error($roleid, 'role', 'rolenotassignablehere'))->to_array();
+        }
 
         // Get the group.
-        $groupid = $params['params']['groupid'];
+        $groupid = $params[self::QUERYSTRING_IDENTIFIER]['groupid'];
 
-        // The name of the cohort enrolment instance.
-        $name = $params['params']['name'];
+        // Validate the role. This is optional.
+        if (!is_null($groupid)) {
+            if ($groupid !== COHORT_CREATE_GROUP && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
+                // Provided group id doesn't exist for this course.
+                $errors[] = (new responses\error($groupid, 'group', 'groupnotexists'))->to_array();
+            }
+        } else {
+            // Get the default value specified for the parameter groupid.
+            $groupid = self::add_instance_get_parameter_default_value('groupid');
+        }
 
-        // The status of the enrolment instance.
-        $status = $params['params']['status'];
+        // Validate the name of the cohort enrolment instance. This is optional.
+        $name = $params[self::QUERYSTRING_IDENTIFIER]['name'];
 
-        $extradata[] = ['object' => 'params', 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid, 'name' => $name, 'status' => $status];
+        if (is_null($name)) {
+            // Get the default value for the name.
+            $name = self::add_instance_get_parameter_default_value('name');
+        }
+
+        // Check the users capabilities to ensure that they can do this.
+        if ($context instanceof \context_course) {
+            // Check that the user has the required capabilities for the course context.
+            $requiredcapabilities = ['moodle/cohort:view', 'moodle/course:managegroups', 'moodle/role:assign'];
+            foreach ($requiredcapabilities as $requiredcapability) {
+                if (!has_capability($requiredcapability, $context)) {
+                    $errors[] = (new responses\error(null, 'capability', 'usermissingrequiredcapability', $requiredcapability))->to_array();
+                }
+            }
+
+            // Check that the user has the capability to enrol config (cohort and moodle course level).
+            $anycapability = ['moodle/course:enrolconfig', 'enrol/cohort:config'];
+            if (!has_any_capability($anycapability, $context)) {
+                $errors[] = (new responses\error(null, 'capability', 'usermissinganycapability', '\''.implode('\', \'', $anycapability).'\''))->to_array();
+            }
+        }
+
+        // Prepare the data to be returned as the response.
+        $extradata[] = [
+            'object'    => self::QUERYSTRING_IDENTIFIER,
+            'cohortid'  => $cohortid,
+            'roleid'    => $roleid,
+            'groupid'   => $groupid,
+            'name'      => $name
+        ];
 
         // Set the HTTP status code.
         $code = empty($errors) ? 200 : 400;
 
-        // Return some test data.
+        // Set the response message.
+        $message = tools::get_string("addinstance:{$code}");
+
+        // The initial response. The field id will be filled in later.
         $response = [
-            'id'        => 1,
             'code'      => $code,
-            'message'   => 'message',
+            'message'   => $message,
             'errors'    => $errors,
             'data'      => $extradata
         ];
 
-        return $response;
-    }
+        if (!empty($errors)) {
+            // Return now due to errors.
+            $response['id'] = self::WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID;
 
-    private static function generate_error_response($object = '', $id = 0, $identifier = '') {
-        return [
-            'object'    => $object,
-            'id'        => $id,
-            'message'   => tools::get_string($identifier)
-        ];
+            return $response;
+        }
+
+        // Add the instance to the course.
+        $response['id'] = 1;
+
+        // Return some data.
+        return $response;
     }
 }

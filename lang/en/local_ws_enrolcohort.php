@@ -48,6 +48,12 @@ $string['groupnotexists'] = 'Group does not exist.';
 $string['usermissingrequiredcapability']    = 'User is missing the required capability \'{$a}\' at the course context.';
 $string['usermissinganycapability']         = 'User is missing one of the following capabilities at the course context: {$a}.';
 
+// Strings for errors - enrolment method.
+$string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
+
+// Strings for errors - status.
+$string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
+
 // Strings for webservice function add_instance return messages.
 $string['addinstance:200']  = 'Cohort enrolment instance added.';
 $string['addinstance:400']  = 'Could not add cohort enrolment instance.';

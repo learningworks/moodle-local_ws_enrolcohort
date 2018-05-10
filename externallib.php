@@ -40,6 +40,24 @@ class local_ws_enrolcohort_external extends external_api {
     const QUERYSTRING_IDENTIFIER = 'instance';
 
     /**
+     * Constants that define the enrolment statuses.
+     */
+    const COHORT_STATUS_ACTIVE_YES = 0;
+    const COHORT_STATUS_ACTIVE_NO  = 1;
+
+    /**
+     * Constants that define group creation modes. Create group is already defined. Values are as per the add instance mform.
+     */
+    const COHORT_GROUP_CREATE_NONE = 0;
+    const COHORT_GROUP_CREATE_NEW = 1;
+
+    /**
+     * Constants that map the customint field names to the name of the fields.
+     */
+    const FIELD_GROUP   = 'customint2';
+    const FIELD_COHORT  = 'customint1';
+
+    /**
      * A constant that defines a webservice function call that has errors.
      */
     const WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID = -1;
@@ -68,8 +86,9 @@ class local_ws_enrolcohort_external extends external_api {
                         'courseid'  => new external_value(PARAM_INT, 'The id of the course.', VALUE_REQUIRED),
                         'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort.', VALUE_REQUIRED),
                         'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED),
-                        'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, 0),
-                        'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL)
+                        'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, self::COHORT_GROUP_CREATE_NONE),
+                        'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL),
+                        'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, self::COHORT_STATUS_ACTIVE_YES)
                     ]
                 )
             ]
@@ -232,6 +251,19 @@ class local_ws_enrolcohort_external extends external_api {
             }
         }
 
+        // Validate the status and set to a default.
+        $status = $params[self::QUERYSTRING_IDENTIFIER]['status'];
+
+        if (!is_null($status) && !in_array($status, [self::COHORT_STATUS_ACTIVE_YES, self::COHORT_STATUS_ACTIVE_NO])) {
+            $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();
+        }
+
+        // This is the important one. Check if the cohort enrolment instance is available for use.
+        $cohortenrolment = enrol_get_plugin('cohort');
+        if (!$cohortenrolment) {
+            $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
+        }
+
         // Prepare the data to be returned as the response.
         $extradata[] = [
             'object'    => self::QUERYSTRING_IDENTIFIER,
@@ -262,7 +294,9 @@ class local_ws_enrolcohort_external extends external_api {
             return $response;
         }
 
-        // Add the instance to the course.
+        // Get the full course object.
+        $course = $DB->get_record('course', ['id' => $courseid]);
+
         $response['id'] = 1;
 
         // Return some data.

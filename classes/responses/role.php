@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base response object for local_ws_enrolcohort.
+ * Role response object for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -28,41 +28,25 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-abstract class response implements base {
-
+class role extends response {
     /**
-     * @var int $id             The id of the object this is representing.
+     * @var mixed $shortname    The shortname of the role.
      */
-    protected $id;
+    protected $shortname;
 
     /**
-     * @var string $object      The name of the object this is representing.
-     */
-    protected $object;
-
-    /**
-     * response constructor.
+     * role constructor.
      *
-     * @param int $id
-     * @param string $object
+     * @param int $id           The id of the role.
+     * @param string $object    The name of this object. Default is role. Don't specify when constructing.
+     * @throws \dml_exception
      */
-    public function __construct($id = 0, $object = '') {
-        $this->id       = $id;
-        $this->object   = $object;
-    }
+    public function __construct($id = 0, $object = 'role') {
+        global $DB;
 
-    /**
-     * Return this response object as an array.
-     *
-     * @return array|mixed
-     */
-    public function to_array() {
-        $return = [];
+        parent::__construct($id, $object);
 
-        foreach ($this as $key => $value) {
-            $return[$key] = $value;
-        }
-
-        return $return;
+        // Get the shortname of this role from the database.
+        $this->shortname = $DB->get_field('role', 'shortname', ['id' => $id]);
     }
 }

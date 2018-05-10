@@ -29,7 +29,15 @@ namespace local_ws_enrolcohort\responses;
 defined('MOODLE_INTERNAL') || die();
 
 interface base {
+    /**
+     * base constructor.
+     */
     public function __construct();
-    public function get_response();
+
+    /**
+     * Returns the object as an array.
+     *
+     * @return mixed
+     */
     public function to_array();
 }

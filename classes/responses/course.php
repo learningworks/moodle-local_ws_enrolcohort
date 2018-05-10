@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Base response object for local_ws_enrolcohort.
+ * Course response object for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -28,41 +28,10 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-abstract class response implements base {
-
-    /**
-     * @var int $id             The id of the object this is representing.
-     */
-    protected $id;
-
-    /**
-     * @var string $object      The name of the object this is representing.
-     */
-    protected $object;
-
-    /**
-     * response constructor.
-     *
-     * @param int $id
-     * @param string $object
-     */
-    public function __construct($id = 0, $object = '') {
-        $this->id       = $id;
-        $this->object   = $object;
-    }
-
-    /**
-     * Return this response object as an array.
-     *
-     * @return array|mixed
-     */
-    public function to_array() {
-        $return = [];
-
-        foreach ($this as $key => $value) {
-            $return[$key] = $value;
-        }
-
-        return $return;
-    }
+class course extends response {
+    protected $name;
+    protected $idnumber;
+    protected $shortname;
+    protected $visible;
+    protected $format;
 }

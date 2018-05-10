@@ -31,15 +31,25 @@ defined('MOODLE_INTERNAL') || die();
 use \local_ws_enrolcohort\tools as tools;
 
 class error extends response {
-
+    /**
+     * @var string $message     A localized message with details about the error.
+     */
     protected $message;
 
+    /**
+     * error constructor.
+     *
+     * @param int $id
+     * @param string $object                            The name of the object this error response is describing.
+     * @param string $identifier                        The langstring identifier. Only gets strings from this plugins lang file.
+     * @param string|\stdClass $langstringplaceholder   Any placeholder values for the lang string.
+     * @throws \coding_exception
+     * @throws \dml_exception
+     */
     public function __construct($id = 0, $object = '', $identifier = '', $langstringplaceholder = null) {
         parent::__construct($id, $object);
-        $this->message = tools::get_string($identifier, $langstringplaceholder);
-    }
 
-    public function get_response() {
-        return parent::get_response();
+        // Get a localized message.
+        $this->message = tools::get_string($identifier, $langstringplaceholder);
     }
 }

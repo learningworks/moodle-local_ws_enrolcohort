@@ -60,5 +60,5 @@ $string['instanceusingdefaultname'] = 'Using system generated name.';
 $string['instancegroupnone']        = 'Enrol instance group none.';
 
 // Strings for webservice function add_instance return messages.
-$string['addinstance:200']  = 'Cohort enrolment instance added.';
+$string['addinstance:201']  = 'Cohort enrolment instance added.';
 $string['addinstance:400']  = 'Could not add cohort enrolment instance.';

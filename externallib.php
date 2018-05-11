@@ -271,7 +271,7 @@ class local_ws_enrolcohort_external extends external_api {
         ];
 
         // Set the HTTP status code.
-        $code = empty($errors) ? 200 : 400;
+        $code = empty($errors) ? 201 : 400;
 
         // Set the response message.
         $message = tools::get_string("addinstance:{$code}");

@@ -29,9 +29,51 @@ namespace local_ws_enrolcohort\responses;
 defined('MOODLE_INTERNAL') || die();
 
 class course extends response {
+    /**
+     * @var $name           The name of the course.
+     */
     protected $name;
+
+    /**
+     * @var $idnumber       The idnumber of the course.
+     */
     protected $idnumber;
+
+    /**
+     * @var $shortname      The shortname of the course.
+     */
     protected $shortname;
+
+    /**
+     * @var $visible        Course visibility.
+     */
     protected $visible;
+
+    /**
+     * @var $format         The format of the course.
+     */
     protected $format;
+
+    /**
+     * course constructor.
+     *
+     * @param int $id
+     * @param string $object    The name of this object. Don't specify when constructing.
+     * @throws \dml_exception
+     */
+    public function __construct($id = 0, $object = 'course') {
+        global $DB;
+
+        parent::__construct($id, $object);
+
+        // Get the course.
+        $course = $DB->get_record('course', ['id' => $id]);
+
+        // Set the field values here.
+        $this->name         = $course->fullname;
+        $this->idnumber     = $course->idnumber;
+        $this->shortname    = $course->shortname;
+        $this->visible      = $course->visible;
+        $this->format       = $course->format;
+    }
 }

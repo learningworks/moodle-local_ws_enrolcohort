@@ -40,12 +40,6 @@ class local_ws_enrolcohort_external extends external_api {
     const QUERYSTRING_IDENTIFIER = 'instance';
 
     /**
-     * Constants that define the enrolment statuses.
-     */
-    const COHORT_STATUS_ACTIVE_YES = 0;
-    const COHORT_STATUS_ACTIVE_NO  = 1;
-
-    /**
      * Constants that define group creation modes. Create group is already defined. Values are as per the add instance mform.
      */
     const COHORT_GROUP_CREATE_NONE = 0;
@@ -88,7 +82,7 @@ class local_ws_enrolcohort_external extends external_api {
                         'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED),
                         'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, self::COHORT_GROUP_CREATE_NONE),
                         'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL),
-                        'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, self::COHORT_STATUS_ACTIVE_YES)
+                        'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED)
                     ]
                 )
             ]
@@ -122,7 +116,7 @@ class local_ws_enrolcohort_external extends external_api {
                         [
                             'object'    => new external_value(PARAM_TEXT, 'the object this is describing'),
                             'id'        => new external_value(PARAM_INT, 'the id of the object', VALUE_OPTIONAL),
-                            'name'      => new external_value(PARAM_TEXT, 'the name of the object'),
+                            'name'      => new external_value(PARAM_TEXT, 'the name of the object', VALUE_OPTIONAL),
                             'courseid'  => new external_value(PARAM_INT, 'the id of the related course', VALUE_OPTIONAL),
                             'cohortid'  => new external_value(PARAM_INT, 'the id of the cohort', VALUE_OPTIONAL),
                             'roleid'    => new external_value(PARAM_INT, 'the id of the related role', VALUE_OPTIONAL),
@@ -130,7 +124,8 @@ class local_ws_enrolcohort_external extends external_api {
                             'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
                             'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
                             'status'    => new external_value(PARAM_INT, 'the status of the object', VALUE_OPTIONAL),
-                            'visible'   => new external_value(PARAM_BOOL, 'the visibility of the object', VALUE_OPTIONAL),
+                            'active'    => new external_value(PARAM_TEXT, 'enrolment instance is active or not', VALUE_OPTIONAL),
+                            'visible'   => new external_value(PARAM_INT, 'the visibility of the object', VALUE_OPTIONAL),
                             'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
                         ],
                         'extra details',
@@ -217,7 +212,8 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the role. This is optional.
         if (!is_null($groupid)) {
-            if ($groupid !== COHORT_CREATE_GROUP && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
+            $groupcreatemodes = [self::COHORT_GROUP_CREATE_NONE, self::COHORT_GROUP_CREATE_NEW];
+            if (!in_array($groupid, $groupcreatemodes) && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
                 // Provided group id doesn't exist for this course.
                 $errors[] = (new responses\error($groupid, 'group', 'groupnotexists'))->to_array();
             }
@@ -254,7 +250,7 @@ class local_ws_enrolcohort_external extends external_api {
         // Validate the status and set to a default.
         $status = $params[self::QUERYSTRING_IDENTIFIER]['status'];
 
-        if (!is_null($status) && !in_array($status, [self::COHORT_STATUS_ACTIVE_YES, self::COHORT_STATUS_ACTIVE_NO])) {
+        if (!is_null($status) && !in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
             $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();
         }
 
@@ -266,7 +262,7 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Prepare the data to be returned as the response.
         $extradata[] = [
-            'object'    => self::QUERYSTRING_IDENTIFIER,
+            'object'    => 'data',
             'cohortid'  => $cohortid,
             'roleid'    => $roleid,
             'groupid'   => $groupid,
@@ -298,6 +294,15 @@ class local_ws_enrolcohort_external extends external_api {
         // Get the full course object.
         $course = $DB->get_record('course', ['id' => $courseid]);
 
+        // Add data about the course to the response.
+        $extradata[] = (new responses\course($courseid))->to_array();
+
+        // Add data about the cohort.
+        $extradata[] = (new responses\cohort($cohortid))->to_array();
+
+        // Add data about the role for the response.
+        $extradata[] = (new responses\role($roleid))->to_array();
+
         // Prepare the fields.
         $fields = [
             'name'              => $name,
@@ -321,18 +326,57 @@ class local_ws_enrolcohort_external extends external_api {
 
         if ($DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
             // Don't add instance. Send an error response.
-            $errors[] = (new responses\error($DB->get_field_select('enrol', 'id', $sqlwhere, $sqlparams), 'instance', 'instanceexists'))->to_array();
+            $instance = $DB->get_record_select('enrol', $sqlwhere, $sqlparams);
+            $errors[] = (new responses\error($instance->id, 'instance', 'instanceexists'))->to_array();
+
+            // Add detail about the enrolment instance.
+            $instancefieldgroupid   = self::FIELD_GROUP;
+            $instancefieldcohortid  = self::FIELD_COHORT;
+
+            $extradata[] = (
+                new responses\enrol(
+                    $instance->id,
+                    'enrol',
+                    $instance->name,
+                    $instance->status,
+                    $instance->roleid,
+                    $instance->courseid,
+                    $instance->$instancefieldcohortid,
+                    $instance->$instancefieldgroupid
+                )
+            )->to_array();
 
             $response['id']         = $fields['id'];
             $response['code']       = 400;
             $response['errors']     = $errors;
             $response['message']    = tools::get_string("addinstance:{$response['code']}");
+            $response['data']       = $extradata;
 
             return $response;
         }
 
         // After all that hard work we can now add the instance.
         $response['id'] = $cohortenrolment->add_instance($course, $fields);
+
+        // Get the enrolment instance.
+        $realenrolinstance = $DB->get_record('enrol', ['id' => $response['id']]);
+        if (empty($realenrolinstance->name)) {
+            $enrolinstancename = $cohortenrolment->get_instance_name($realenrolinstance).' - '.tools::get_string('instanceusingdefaultname');
+        } else {
+            $enrolinstancename = $realenrolinstance->name;
+        }
+
+        // Add data about the group to the response.
+        $realgroupid = $DB->get_field('enrol', self::FIELD_GROUP, ['id' => $response['id']]);
+        $extradata[] = (new responses\group($realgroupid, 'group', $courseid))->to_array();
+
+        // Add data about the enrolment instance to the response.
+        $extradata[] = (
+            new responses\enrol($response['id'], 'enrol', $enrolinstancename, $status, $roleid, $courseid, $cohortid, $realgroupid)
+        )->to_array();
+
+        // Add the additional extra data to the response.
+        $response['data'] = $extradata;
 
         // Return some data.
         return $response;

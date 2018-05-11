@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Role response object for local_ws_enrolcohort.
+ * Enrolment instance response object for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -28,25 +28,46 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-class role extends response {
+class enrol extends response {
     /**
-     * @var mixed $shortname    The shortname of the role.
+     * @var $name           The name provided to the enrolment instance.
      */
-    protected $shortname;
+    protected $name;
 
     /**
-     * role constructor.
-     *
-     * @param int $id           The id of the role.
-     * @param string $object    The name of this object. Don't specify when constructing.
-     * @throws \dml_exception
+     * @var $status         The status of the enrolment instance.
      */
-    public function __construct($id = 0, $object = 'role') {
-        global $DB;
+    protected $status;
 
+    /**
+     * @var $roleid         The id of the role associated to this enrolment instance.
+     */
+    protected $roleid;
+
+    /**
+     * @var $courseid       The id of the course this enrolment instance is for.
+     */
+    protected $courseid;
+
+    /**
+     * @var $cohortid       The id of the cohort.
+     */
+    protected $cohortid;
+
+    /**
+     * @var $groupid        The id of the group.
+     */
+    protected $groupid;
+
+    public function __construct($id = 0, $object = 'enrol', $name = '', $status = 0, $roleid = 0, $courseid = 0, $cohortid = 0, $groupid = 0) {
         parent::__construct($id, $object);
 
-        // Get the shortname of this role from the database.
-        $this->shortname = $DB->get_field('role', 'shortname', ['id' => $id]);
+        // Set the values for the fields.
+        $this->name     = $name;
+        $this->status   = $status;
+        $this->roleid   = $roleid;
+        $this->courseid = $courseid;
+        $this->cohortid = $cohortid;
+        $this->groupid  = $groupid;
     }
 }

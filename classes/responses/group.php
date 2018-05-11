@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Role response object for local_ws_enrolcohort.
+ * Group response object for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -28,25 +28,42 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-class role extends response {
+use local_ws_enrolcohort\tools;
+
+class group extends response {
     /**
-     * @var mixed $shortname    The shortname of the role.
+     * @var $courseid   The id of the course this group belongs to.
      */
-    protected $shortname;
+    protected $courseid;
 
     /**
-     * role constructor.
-     *
-     * @param int $id           The id of the role.
-     * @param string $object    The name of this object. Don't specify when constructing.
-     * @throws \dml_exception
+     * @var $name       The name of the group.
      */
-    public function __construct($id = 0, $object = 'role') {
+    protected $name;
+
+    /**
+     * group constructor.
+     *
+     * @param int $id               The id of the group.
+     * @param string $object        The name of this object. Don't specify when constructing.
+     * @param null|int $courseid    The id of the course. If null then the group creation errored.
+     * @throws \dml_exception
+     * @throws \coding_exception
+     */
+    public function __construct($id = 0, $object = 'group', $courseid = null) {
         global $DB;
 
         parent::__construct($id, $object);
 
-        // Get the shortname of this role from the database.
-        $this->shortname = $DB->get_field('role', 'shortname', ['id' => $id]);
+        // Set the fields.
+        $this->id = $id;
+
+        if (is_null($courseid) || $id == 0) {
+            $this->name     = tools::get_string('instancegroupnone');
+            $this->courseid = -1;
+        } else {
+            $this->name     = $DB->get_field('groups', 'name', ['id' => $id, 'courseid' => $courseid]);
+            $this->courseid = $courseid;
+        }
     }
 }

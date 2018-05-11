@@ -42,7 +42,7 @@ $string['rolenotexists']            = 'Role does not exist.';
 $string['rolenotassignablehere']    = 'Role is not assignable here.';
 
 // Strings for errors - group.
-$string['groupnotexists'] = 'Group does not exist.';
+$string['groupnotexists']   = 'Group does not exist.';
 
 // Strings for errors - capabilities.
 $string['usermissingrequiredcapability']    = 'User is missing the required capability \'{$a}\' at the course context.';
@@ -54,8 +54,10 @@ $string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
 // Strings for errors - status.
 $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
 
-// Strings for errors - instance.
-$string['instanceexists'] = 'Cohort is already synchronised with selected role.';
+// Strings for instance.
+$string['instanceexists']           = 'Cohort is already synchronised with selected role.';
+$string['instanceusingdefaultname'] = 'Using system generated name.';
+$string['instancegroupnone']        = 'Enrol instance group none.';
 
 // Strings for webservice function add_instance return messages.
 $string['addinstance:200']  = 'Cohort enrolment instance added.';

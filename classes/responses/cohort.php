@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Role response object for local_ws_enrolcohort.
+ * Cohort response object for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -28,25 +28,40 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-class role extends response {
+class cohort extends response {
     /**
-     * @var mixed $shortname    The shortname of the role.
+     * @var $name       The name of the cohort.
      */
-    protected $shortname;
+    protected $name;
 
     /**
-     * role constructor.
+     * @var $idnumber   The idnumber of the cohort.
+     */
+    protected $idnumber;
+
+    /**
+     * @var $visible    The visibility of the cohort.
+     */
+    protected $visible;
+
+    /**
+     * cohort constructor.
      *
-     * @param int $id           The id of the role.
+     * @param int $id
      * @param string $object    The name of this object. Don't specify when constructing.
      * @throws \dml_exception
      */
-    public function __construct($id = 0, $object = 'role') {
+    public function __construct($id = 0, $object = 'cohort') {
         global $DB;
 
         parent::__construct($id, $object);
 
-        // Get the shortname of this role from the database.
-        $this->shortname = $DB->get_field('role', 'shortname', ['id' => $id]);
+        // Get the cohort.
+        $cohort = $DB->get_record('cohort', ['id' => $id]);
+
+        // Set the fields.
+        $this->name     = $cohort->name;
+        $this->idnumber = $cohort->idnumber;
+        $this->visible  = $cohort->visible;
     }
 }

@@ -29,29 +29,29 @@ defined('MOODLE_INTERNAL') || die();
 // Default langstring.
 $string['pluginname'] = 'Extended enrol cohort webservices';
 
-// Strings for errors - course.
+// Strings for course stuff.
 $string['coursenotexists']  = 'Course does not exist.';
 $string['courseissite']     = 'Can not add instance to the site course.';
 
-// Strings for errors - cohort.
+// Strings for cohort stuff.
 $string['cohortnotexists']              = 'Cohort does not exist.';
 $string['cohortnotavailableatcontext']  = 'Cohort cannot be added to this course.';
 
-// Strings for errors - role.
+// Strings for role stuff.
 $string['rolenotexists']            = 'Role does not exist.';
 $string['rolenotassignablehere']    = 'Role is not assignable here.';
 
-// Strings for errors - group.
+// Strings for group stuff.
 $string['groupnotexists']   = 'Group does not exist.';
 
-// Strings for errors - capabilities.
+// Strings for capabilities stuff.
 $string['usermissingrequiredcapability']    = 'User is missing the required capability \'{$a}\' at the course context.';
 $string['usermissinganycapability']         = 'User is missing one of the following capabilities at the course context: {$a}.';
 
-// Strings for errors - enrolment method.
+// Strings for enrolment method stuff.
 $string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
 
-// Strings for errors - status.
+// Strings for status stuff.
 $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
 
 // Strings for instance.

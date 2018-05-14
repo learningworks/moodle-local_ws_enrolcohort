@@ -252,6 +252,9 @@ class local_ws_enrolcohort_external extends external_api {
 
         if (!is_null($status) && !in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
             $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();
+        } else {
+            // Set status to the default.
+            $status = self::add_instance_get_parameter_default_value('status');
         }
 
         // This is the important one. Check if the cohort enrolment instance is available for use.

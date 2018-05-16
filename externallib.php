@@ -81,7 +81,7 @@ class local_ws_enrolcohort_external extends external_api {
                         'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort.', VALUE_REQUIRED),
                         'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED),
                         'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, self::COHORT_GROUP_CREATE_NONE),
-                        'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL),
+                        'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL, ''),
                         'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED)
                     ]
                 )

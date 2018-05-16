@@ -176,6 +176,9 @@ class local_ws_enrolcohort_external extends external_api {
         } else {
             // Set the context to course for validation.
             $context = \context_course::instance($courseid);
+
+            // Add info to the response object.
+            $extradata[] = (new responses\course($courseid))->to_array();
         }
 
         // Get the cohort. This is required
@@ -185,12 +188,21 @@ class local_ws_enrolcohort_external extends external_api {
         if (!$DB->record_exists('cohort', ['id' => $cohortid])) {
             $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotexists'))->to_array();
         } else if ($context instanceof \context_system) {
+            // Add some info to the response object.
+            $extradata[] = (new responses\cohort($cohortid))->to_array();
+
             $errors[] = (new responses\error($cohortid, 'cohortsite', 'cohortnotavailableatcontext'))->to_array();
         } else if ($context instanceof \context_course) {
+            // Add some info to the response object.
+            $extradata[] = (new responses\cohort($cohortid))->to_array();
+
+            // Get the available cohorts.
             $availablecohorts = cohort_get_available_cohorts($context);
             if (empty($availablecohorts) || !isset($availablecohorts[$cohortid])) {
                 $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotavailableatcontext'))->to_array();
             }
+        } else if (is_null($context)) {
+            $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnullcontext'))->to_array();
         }
 
         // Get the role.
@@ -205,6 +217,9 @@ class local_ws_enrolcohort_external extends external_api {
         } else if (empty($assignableroles) || !isset($assignableroles[$roleid])) {
             // Role is not assignable at this context.
             $errors[] = (new responses\error($roleid, 'role', 'rolenotassignablehere'))->to_array();
+
+            // Role exists. Add some info to the response object.
+            $extradata[] = (new responses\role($roleid))->to_array();
         }
 
         // Get the group.
@@ -302,9 +317,6 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Add data about the cohort.
         $extradata[] = (new responses\cohort($cohortid))->to_array();
-
-        // Add data about the role for the response.
-        $extradata[] = (new responses\role($roleid))->to_array();
 
         // Prepare the fields.
         $fields = [

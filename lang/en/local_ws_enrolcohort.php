@@ -36,6 +36,7 @@ $string['courseissite']     = 'Can not add instance to the site course.';
 // Strings for cohort stuff.
 $string['cohortnotexists']              = 'Cohort does not exist.';
 $string['cohortnotavailableatcontext']  = 'Cohort cannot be added to this course.';
+$string['cohortnullcontext']            = 'Cohort cannot be added because the context is null.';
 
 // Strings for role stuff.
 $string['rolenotexists']            = 'Role does not exist.';

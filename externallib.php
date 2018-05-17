@@ -56,17 +56,17 @@ class local_ws_enrolcohort_external extends external_api {
      */
     const WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID = -1;
 
-    /// <editor-fold desc="Functions for add_instance()">
+    /// <editor-fold desc="Functions for add_instance().">
 
     /**
      * Gets the default value for a parameter. Use properly. No error checking happens.
      *
-     * @param string $querystringvalue
+     * @param string $parametername
      * @return mixed
      */
-    private static function add_instance_get_parameter_default_value($querystringvalue = '') {
+    private static function add_instance_get_parameter_default_value($parametername = '') {
         // Just ask for the right things and one shall receive. We shan't be making any mistakes.
-        return self::add_instance_parameters()->keys[self::QUERYSTRING_IDENTIFIER]->keys[$querystringvalue]->default;
+        return self::add_instance_parameters()->keys[self::QUERYSTRING_IDENTIFIER]->keys[$parametername]->default;
     }
 
     /**

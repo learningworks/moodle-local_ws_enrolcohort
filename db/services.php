@@ -35,13 +35,24 @@ $functions = [
         'description'   => 'Adds a new cohort sync enrolment instance to the specified course.',
         'capabilities'  => 'moodle/cohort:view, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
         'type'          => 'create'
+    ],
+    'local_ws_enrolcohort_update_instance' => [
+        'classname'     => 'local_ws_enrolcohort_external',
+        'methodname'    => 'update_instance',
+        'classpath'     => 'local/ws_enrolcohort/externallib.php',
+        'description'   => 'Updates an existing cohort enrolment instance.',
+        'capabilities'  => 'moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'type'          => 'update'
     ]
 ];
 
 // We define the services to install as pre-build services. A pre-build service is not editable by administrator.
 $services = [
     'Extended webservice for enrol_cohort' => [
-        'functions'         => ['local_ws_enrolcohort_add_instance'],
+        'functions'         => [
+            'local_ws_enrolcohort_add_instance',
+            'local_ws_enrolcohort_update_instance'
+        ],
         'restrictedusers'   => 1,
         'enabled'           => 1,
     ]

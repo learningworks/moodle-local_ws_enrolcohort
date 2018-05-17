@@ -400,4 +400,96 @@ class local_ws_enrolcohort_external extends external_api {
     }
 
     /// </editor-fold>
+
+    /// <editor-fold desc="Functions for update_instance().">
+
+    public static function update_instance_get_parameter_default_value($parametername = '') {
+        return self::update_instance_parameters()->keys[self::QUERYSTRING_IDENTIFIER]->keys[$parametername]->default;
+    }
+
+    /**
+     * Returns description of the update_instance function parameters.
+     *
+     * @return external_function_parameters
+     */
+    public static function update_instance_parameters() {
+        return new external_function_parameters(
+            [
+                self::QUERYSTRING_IDENTIFIER => new external_single_structure(
+                    [
+                        'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance.', VALUE_REQUIRED),
+                        'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL, ''),
+                        'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED),
+                        'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL, null),
+                        'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, null)
+                    ]
+                )
+            ]
+        );
+    }
+
+    /**
+     * Returns description of the update_instance function return value.
+     *
+     * @return external_single_structure
+     */
+    public static function update_instance_returns() {
+        // This returns the same as add_instance().
+        return self::add_instance_returns();
+    }
+
+    public static function update_instance($params) {
+        // Check the call for parameters.
+        $params = self::validate_parameters(self::update_instance_parameters(), [self::QUERYSTRING_IDENTIFIER => $params]);
+
+        // A place for errors.
+        $errors = [];
+
+        // Other data.
+        $extradata = [];
+
+        // Get the enrolment instance id.
+        $id = $params[self::QUERYSTRING_IDENTIFIER]['id'];
+
+        // Validate the enrolment instance id.
+
+        // Get the enrolment instance name.
+        $name = $params[self::QUERYSTRING_IDENTIFIER]['name'];
+
+        // Validate the enrolment instance name.
+
+        // Get the enrolment instance status.
+        $status = $params[self::QUERYSTRING_IDENTIFIER]['status'];
+
+        // Validate the enrolment instance status.
+
+        // Get the enrolment instance role id.
+        $roleid = $params[self::QUERYSTRING_IDENTIFIER]['roleid'];
+
+        // Validate the enrolment role id.
+
+        // Get the group id.
+        $groupid = $params[self::QUERYSTRING_IDENTIFIER]['groupid'];
+
+        // Validate the group id.
+
+        // The HTTP response code.
+        $code = empty($errors) ? 200 : 400;
+
+        // Response message.
+        $message = tools::get_string("updateinstance:{$code}");
+
+        // Prepare the response.
+        $response = [
+            'id'        => $id,
+            'code'      => $code,
+            'message'   => $message,
+            'errors'    => $errors,
+            'data'      => $extradata
+        ];
+
+        return $response;
+    }
+
+    /// </editor-fold>
 }

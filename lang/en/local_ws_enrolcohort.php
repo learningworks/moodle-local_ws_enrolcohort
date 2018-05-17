@@ -63,3 +63,7 @@ $string['instancegroupnone']        = 'Enrol instance group none.';
 // Strings for webservice function add_instance return messages.
 $string['addinstance:201']  = 'Cohort enrolment instance added.';
 $string['addinstance:400']  = 'Could not add cohort enrolment instance.';
+
+// Strings for webservice function update_instance.
+$string['updateinstance:200'] = 'Cohort enrolment instance updated.';
+$string['updateinstance:400'] = 'Could not update cohort enrolment instance.';

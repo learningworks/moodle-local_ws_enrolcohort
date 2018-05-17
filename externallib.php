@@ -56,6 +56,8 @@ class local_ws_enrolcohort_external extends external_api {
      */
     const WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID = -1;
 
+    /// <editor-fold desc="Functions for add_instance()">
+
     /**
      * Gets the default value for a parameter. Use properly. No error checking happens.
      *
@@ -396,4 +398,6 @@ class local_ws_enrolcohort_external extends external_api {
         // Return some data.
         return $response;
     }
+
+    /// </editor-fold>
 }

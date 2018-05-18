@@ -56,6 +56,54 @@ class local_ws_enrolcohort_external extends external_api {
      */
     const WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID = -1;
 
+    /**
+     * All the webservices functions defined in this external lib return the same stuff.
+     * This is some dry code.
+     *
+     * @return external_single_structure
+     */
+    private static function webservice_function_returns() {
+        return new external_single_structure(
+            [
+                'id'        => new external_value(PARAM_INT, 'enrolment instance id'),
+                'code'      => new external_value(PARAM_INT, 'http status code'),
+                'message'   => new external_value(PARAM_TEXT, 'human readable response message'),
+                'errors'    => new external_multiple_structure(
+                    new external_single_structure(
+                        [
+                            'object'    => new external_value(PARAM_TEXT, 'the object that failed'),
+                            'id'        => new external_value(PARAM_INT, 'the id of the failed object'),
+                            'message'   => new external_value(PARAM_TEXT, 'human readable response message')
+                        ],
+                        'component errors',
+                        VALUE_OPTIONAL
+                    )
+                ),
+                'data' => new external_multiple_structure(
+                    new external_single_structure(
+                        [
+                            'object'    => new external_value(PARAM_TEXT, 'the object this is describing'),
+                            'id'        => new external_value(PARAM_INT, 'the id of the object', VALUE_OPTIONAL),
+                            'name'      => new external_value(PARAM_TEXT, 'the name of the object', VALUE_OPTIONAL),
+                            'courseid'  => new external_value(PARAM_INT, 'the id of the related course', VALUE_OPTIONAL),
+                            'cohortid'  => new external_value(PARAM_INT, 'the id of the cohort', VALUE_OPTIONAL),
+                            'roleid'    => new external_value(PARAM_INT, 'the id of the related role', VALUE_OPTIONAL),
+                            'groupid'   => new external_value(PARAM_INT, 'the id of the group', VALUE_OPTIONAL),
+                            'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
+                            'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
+                            'status'    => new external_value(PARAM_INT, 'the status of the object', VALUE_OPTIONAL),
+                            'active'    => new external_value(PARAM_TEXT, 'enrolment instance is active or not', VALUE_OPTIONAL),
+                            'visible'   => new external_value(PARAM_INT, 'the visibility of the object', VALUE_OPTIONAL),
+                            'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
+                        ],
+                        'extra details',
+                        VALUE_OPTIONAL
+                    )
+                )
+            ]
+        );
+    }
+
     /// <editor-fold desc="Functions for add_instance().">
 
     /**
@@ -97,45 +145,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_single_structure
      */
     public static function add_instance_returns() {
-        return new external_single_structure(
-            [
-                'id'        => new external_value(PARAM_INT, 'enrolment instance id'),
-                'code'      => new external_value(PARAM_INT, 'http status code'),
-                'message'   => new external_value(PARAM_TEXT, 'human readable response message'),
-                'errors'    => new external_multiple_structure(
-                    new external_single_structure(
-                        [
-                            'object'    => new external_value(PARAM_TEXT, 'the object that failed'),
-                            'id'        => new external_value(PARAM_INT, 'the id of the failed object'),
-                            'message'   => new external_value(PARAM_TEXT, 'human readable response message')
-                        ],
-                        'component errors',
-                        VALUE_OPTIONAL
-                    )
-                ),
-                'data' => new external_multiple_structure(
-                    new external_single_structure(
-                        [
-                            'object'    => new external_value(PARAM_TEXT, 'the object this is describing'),
-                            'id'        => new external_value(PARAM_INT, 'the id of the object', VALUE_OPTIONAL),
-                            'name'      => new external_value(PARAM_TEXT, 'the name of the object', VALUE_OPTIONAL),
-                            'courseid'  => new external_value(PARAM_INT, 'the id of the related course', VALUE_OPTIONAL),
-                            'cohortid'  => new external_value(PARAM_INT, 'the id of the cohort', VALUE_OPTIONAL),
-                            'roleid'    => new external_value(PARAM_INT, 'the id of the related role', VALUE_OPTIONAL),
-                            'groupid'   => new external_value(PARAM_INT, 'the id of the group', VALUE_OPTIONAL),
-                            'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
-                            'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
-                            'status'    => new external_value(PARAM_INT, 'the status of the object', VALUE_OPTIONAL),
-                            'active'    => new external_value(PARAM_TEXT, 'enrolment instance is active or not', VALUE_OPTIONAL),
-                            'visible'   => new external_value(PARAM_INT, 'the visibility of the object', VALUE_OPTIONAL),
-                            'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
-                        ],
-                        'extra details',
-                        VALUE_OPTIONAL
-                    )
-                )
-            ]
-        );
+        return self::webservice_function_returns();
     }
 
     /**
@@ -434,8 +444,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_single_structure
      */
     public static function update_instance_returns() {
-        // This returns the same as add_instance().
-        return self::add_instance_returns();
+        return self::webservice_function_returns();
     }
 
     public static function update_instance($params) {

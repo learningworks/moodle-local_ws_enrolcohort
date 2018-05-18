@@ -67,3 +67,11 @@ $string['addinstance:400']  = 'Could not add cohort enrolment instance.';
 // Strings for webservice function update_instance.
 $string['updateinstance:200'] = 'Cohort enrolment instance updated.';
 $string['updateinstance:400'] = 'Could not update cohort enrolment instance.';
+
+// Strings for webservice function delete_instance.
+$string['deleteinstance:200'] = 'Cohort enrolment instance deleted.';
+$string['deleteinstance:400'] = 'Could not delete cohort enrolment instance.';
+
+// Strings for webservice function get_instances.
+$string['getinstances:200'] = 'Could get cohort enrolment instances.';
+$string['getinstances:400'] = 'Could not get cohort enrolment instances.';

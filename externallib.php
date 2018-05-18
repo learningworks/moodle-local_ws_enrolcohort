@@ -510,13 +510,33 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// <editor-fold desc="Functions for delete_instance().">
 
+    public static function delete_instance_parameters() {
 
+    }
+
+    public static function delete_instance_returns() {
+        return self::webservice_function_returns();
+    }
+
+    public static function delete_instance($params) {
+
+    }
 
     /// </editor-fold>
 
     /// <editor-fold desc="Functions for get_instances().">
 
+    public static function get_instances_parameters() {
 
+    }
+
+    public static function get_instances_returns() {
+        return self::webservice_function_returns();
+    }
+
+    public static function get_instances($params) {
+
+    }
 
     /// </editor-fold>
 }

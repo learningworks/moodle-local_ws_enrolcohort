@@ -140,7 +140,7 @@ class local_ws_enrolcohort_external extends external_api {
     }
 
     /**
-     * Returns description of the add_instance function return value.
+     * Returns description of the add_instance() function return value.
      *
      * @return external_single_structure
      */
@@ -411,7 +411,7 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// </editor-fold>
 
-    /// <editor-fold desc="Functions for update_instance().">
+    /// <editor-fold desc="Functions for update_instance(). TODO: All of this stuff.">
 
     /**
      * Gets the default value for an update_instance() parameter. Use properly. No error checking happens.
@@ -424,7 +424,7 @@ class local_ws_enrolcohort_external extends external_api {
     }
 
     /**
-     * Returns description of the update_instance function parameters.
+     * Returns description of the update_instance() function parameters.
      *
      * @return external_function_parameters
      */
@@ -508,12 +508,17 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// </editor-fold>
 
-    /// <editor-fold desc="Functions for delete_instance().">
+    /// <editor-fold desc="Functions for delete_instance(). TODO: All of this stuff.">
 
     public static function delete_instance_parameters() {
 
     }
 
+    /**
+     * Returns description of the delete_instance() function return value.
+     *
+     * @return external_single_structure
+     */
     public static function delete_instance_returns() {
         return self::webservice_function_returns();
     }
@@ -524,12 +529,17 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// </editor-fold>
 
-    /// <editor-fold desc="Functions for get_instances().">
+    /// <editor-fold desc="Functions for get_instances(). TODO: All of this stuff.">
 
     public static function get_instances_parameters() {
 
     }
 
+    /**
+     * Returns description of the get_instances() function return value.
+     *
+     * @return external_single_structure
+     */
     public static function get_instances_returns() {
         return self::webservice_function_returns();
     }

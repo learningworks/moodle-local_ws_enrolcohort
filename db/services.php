@@ -68,7 +68,7 @@ $services = [
         'functions'         => [
             'local_ws_enrolcohort_add_instance',
             'local_ws_enrolcohort_update_instance',
-            'local_ws_enrolecohort_delete_instance',
+            'local_ws_enrolcohort_delete_instance',
             'local_ws_enrolcohort_get_instances'
         ],
         'restrictedusers'   => 1,

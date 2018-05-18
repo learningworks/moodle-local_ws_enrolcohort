@@ -107,7 +107,7 @@ class local_ws_enrolcohort_external extends external_api {
     /// <editor-fold desc="Functions for add_instance().">
 
     /**
-     * Gets the default value for a parameter. Use properly. No error checking happens.
+     * Gets the default value for an add_instance() parameter. Use properly. No error checking happens.
      *
      * @param string $parametername
      * @return mixed
@@ -413,7 +413,13 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// <editor-fold desc="Functions for update_instance().">
 
-    public static function update_instance_get_parameter_default_value($parametername = '') {
+    /**
+     * Gets the default value for an update_instance() parameter. Use properly. No error checking happens.
+     *
+     * @param string $parametername
+     * @return mixed
+     */
+    private static function update_instance_get_parameter_default_value($parametername = '') {
         return self::update_instance_parameters()->keys[self::QUERYSTRING_IDENTIFIER]->keys[$parametername]->default;
     }
 
@@ -499,6 +505,18 @@ class local_ws_enrolcohort_external extends external_api {
 
         return $response;
     }
+
+    /// </editor-fold>
+
+    /// <editor-fold desc="Functions for delete_instance().">
+
+
+
+    /// </editor-fold>
+
+    /// <editor-fold desc="Functions for get_instances().">
+
+
 
     /// </editor-fold>
 }

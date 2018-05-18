@@ -64,15 +64,15 @@ class local_ws_enrolcohort_external extends external_api {
      */
     private static function webservice_function_returns() {
         return new external_single_structure([
-            'id'        => new external_value(PARAM_INT, 'enrolment instance id'),
-            'code'      => new external_value(PARAM_INT, 'http status code'),
-            'message'   => new external_value(PARAM_TEXT, 'human readable response message'),
+            'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
+            'code'      => new external_value(PARAM_INT, 'HTTP status code'),
+            'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
             'errors'    => new external_multiple_structure(
                 new external_single_structure(
                     [
-                        'object'    => new external_value(PARAM_TEXT, 'the object that failed'),
-                        'id'        => new external_value(PARAM_INT, 'the id of the failed object'),
-                        'message'   => new external_value(PARAM_TEXT, 'human readable response message')
+                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
+                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
                     ],
                     'component errors',
                     VALUE_OPTIONAL
@@ -81,19 +81,19 @@ class local_ws_enrolcohort_external extends external_api {
             'data' => new external_multiple_structure(
                 new external_single_structure(
                     [
-                        'object'    => new external_value(PARAM_TEXT, 'the object this is describing'),
-                        'id'        => new external_value(PARAM_INT, 'the id of the object', VALUE_OPTIONAL),
-                        'name'      => new external_value(PARAM_TEXT, 'the name of the object', VALUE_OPTIONAL),
-                        'courseid'  => new external_value(PARAM_INT, 'the id of the related course', VALUE_OPTIONAL),
-                        'cohortid'  => new external_value(PARAM_INT, 'the id of the cohort', VALUE_OPTIONAL),
-                        'roleid'    => new external_value(PARAM_INT, 'the id of the related role', VALUE_OPTIONAL),
-                        'groupid'   => new external_value(PARAM_INT, 'the id of the group', VALUE_OPTIONAL),
-                        'idnumber'  => new external_value(PARAM_RAW, 'the idnumber of the object', VALUE_OPTIONAL),
-                        'shortname' => new external_value(PARAM_TEXT, 'the shortname of the object', VALUE_OPTIONAL),
-                        'status'    => new external_value(PARAM_INT, 'the status of the object', VALUE_OPTIONAL),
-                        'active'    => new external_value(PARAM_TEXT, 'enrolment instance is active or not', VALUE_OPTIONAL),
-                        'visible'   => new external_value(PARAM_INT, 'the visibility of the object', VALUE_OPTIONAL),
-                        'format'    => new external_value(PARAM_PLUGIN, 'the course format', VALUE_OPTIONAL)
+                        'object'    => new external_value(PARAM_TEXT, 'The object this is describing'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the object', VALUE_OPTIONAL),
+                        'name'      => new external_value(PARAM_TEXT, 'The name of the object', VALUE_OPTIONAL),
+                        'courseid'  => new external_value(PARAM_INT, 'The id of the related course', VALUE_OPTIONAL),
+                        'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort', VALUE_OPTIONAL),
+                        'roleid'    => new external_value(PARAM_INT, 'The id of the related role', VALUE_OPTIONAL),
+                        'groupid'   => new external_value(PARAM_INT, 'The id of the group', VALUE_OPTIONAL),
+                        'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the object', VALUE_OPTIONAL),
+                        'shortname' => new external_value(PARAM_TEXT, 'The shortname of the object', VALUE_OPTIONAL),
+                        'status'    => new external_value(PARAM_INT, 'The status of the object', VALUE_OPTIONAL),
+                        'active'    => new external_value(PARAM_TEXT, 'Enrolment instance is active or not', VALUE_OPTIONAL),
+                        'visible'   => new external_value(PARAM_INT, 'The visibility of the object', VALUE_OPTIONAL),
+                        'format'    => new external_value(PARAM_PLUGIN, 'The course format', VALUE_OPTIONAL)
                     ],
                     'extra details',
                     VALUE_OPTIONAL

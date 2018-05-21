@@ -193,7 +193,7 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the course. This is required.
         if ($courseid == $SITE->id) {
-            $errors[] = (new responses\error($courseid, 'course', 'courseissite'))->to_array();
+            $errors[] = (new responses\error($courseid, 'course', 'addinstance:courseissite'))->to_array();
 
             // Set the context to system for validation.
             $context = \context_system::instance();
@@ -374,7 +374,7 @@ class local_ws_enrolcohort_external extends external_api {
         if ($DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
             // Don't add instance. Send an error response.
             $instance = $DB->get_record_select('enrol', $sqlwhere, $sqlparams);
-            $errors[] = (new responses\error($instance->id, 'instance', 'instanceexists'))->to_array();
+            $errors[] = (new responses\error($instance->id, 'instance', 'addinstance:cohortalreadysynced'))->to_array();
 
             // Add detail about the enrolment instance.
 
@@ -404,7 +404,7 @@ class local_ws_enrolcohort_external extends external_api {
         // Get the enrolment instance.
         $realenrolinstance = $DB->get_record('enrol', ['id' => $response['id']]);
         if (empty($realenrolinstance->name)) {
-            $enrolinstancename = $cohortenrolment->get_instance_name($realenrolinstance).' - '.tools::get_string('instanceusingdefaultname');
+            $enrolinstancename = $cohortenrolment->get_instance_name($realenrolinstance).' - '.tools::get_string('addinstance:usingdefaultname');
         } else {
             $enrolinstancename = $realenrolinstance->name;
         }
@@ -669,6 +669,8 @@ class local_ws_enrolcohort_external extends external_api {
     }
 
     public static function delete_instance($params) {
+        global $DB;
+
         // Check the parameters.
         $params = self::validate_parameters(self::delete_instance_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
 
@@ -680,6 +682,9 @@ class local_ws_enrolcohort_external extends external_api {
         $id = $params[self::QUERYSTRING_INSTANCE]['id'];
 
         // Validate the enrolment instance id.
+        if (!$DB->record_exists('enrol', ['id' => $id, 'enrol' => 'cohort'])) {
+            $errors[] = (new responses\error($id, 'enrol', ''));
+        }
 
         // Set the HTTP response code.
         $code = empty($errors) ? 200 : 400;

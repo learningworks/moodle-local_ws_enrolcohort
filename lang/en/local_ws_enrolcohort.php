@@ -31,7 +31,6 @@ $string['pluginname'] = 'Extended enrol cohort webservices';
 
 // Strings for course stuff.
 $string['coursenotexists']  = 'Course does not exist.';
-$string['courseissite']     = 'Can not add instance to the site course.';
 
 // Strings for cohort stuff.
 $string['cohortnotexists']              = 'Cohort does not exist.';
@@ -56,14 +55,15 @@ $string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
 $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
 
 // Strings for instance.
-$string['instanceexists']           = 'Cohort is already synchronised with selected role.';
-$string['instanceusingdefaultname'] = 'Using system generated name.';
 $string['instancegroupnone']        = 'Enrol instance group none.';
 $string['instancenotexists']        = 'Unknown enrolment instance.';
 
-// Strings for webservice function add_instance return messages.
-$string['addinstance:201']  = 'Cohort enrolment instance added.';
-$string['addinstance:400']  = 'Could not add cohort enrolment instance.';
+// Strings for webservice function add_instance.
+$string['addinstance:201']                  = 'Cohort enrolment instance added.';
+$string['addinstance:400']                  = 'Could not add cohort enrolment instance.';
+$string['addinstance:cohortalreadysynced']  = 'Cohort is already synchronised with selected role.';
+$string['addinstance:usingdefaultname']     = 'Using system generated name.';
+$string['addinstance:courseissite']         = 'Can not add instance to the site course.';
 
 // Strings for webservice function update_instance.
 $string['updateinstance:200'] = 'Cohort enrolment instance updated.';

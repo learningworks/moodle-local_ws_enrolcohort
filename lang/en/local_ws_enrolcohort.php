@@ -59,6 +59,7 @@ $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - acti
 $string['instanceexists']           = 'Cohort is already synchronised with selected role.';
 $string['instanceusingdefaultname'] = 'Using system generated name.';
 $string['instancegroupnone']        = 'Enrol instance group none.';
+$string['instancenotexists']        = 'Unknown enrolment instance.';
 
 // Strings for webservice function add_instance return messages.
 $string['addinstance:201']  = 'Cohort enrolment instance added.';
@@ -67,6 +68,7 @@ $string['addinstance:400']  = 'Could not add cohort enrolment instance.';
 // Strings for webservice function update_instance.
 $string['updateinstance:200'] = 'Cohort enrolment instance updated.';
 $string['updateinstance:400'] = 'Could not update cohort enrolment instance.';
+$string['updateinstance:nochange'] = 'No changes were made to the cohort enrolment instance.';
 
 // Strings for webservice function delete_instance.
 $string['deleteinstance:200'] = 'Cohort enrolment instance deleted.';
@@ -75,3 +77,6 @@ $string['deleteinstance:400'] = 'Could not delete cohort enrolment instance.';
 // Strings for webservice function get_instances.
 $string['getinstances:200'] = 'Could get cohort enrolment instances.';
 $string['getinstances:400'] = 'Could not get cohort enrolment instances.';
+
+// String for an unknown HTTP status code.
+$string['unknownstatuscode'] = 'Unknown status code {$a}.';

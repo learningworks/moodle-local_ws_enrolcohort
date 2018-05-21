@@ -432,7 +432,7 @@ class local_ws_enrolcohort_external extends external_api {
         return new external_function_parameters([
             self::QUERYSTRING_INSTANCE => new external_single_structure([
                 'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance.', VALUE_REQUIRED),
-                'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL, ''),
+                'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL),
                 'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED),
                 'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL, null),
                 'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, null)

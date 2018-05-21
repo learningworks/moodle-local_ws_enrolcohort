@@ -377,7 +377,6 @@ class local_ws_enrolcohort_external extends external_api {
             $errors[] = (new responses\error($instance->id, 'instance', 'addinstance:cohortalreadysynced'))->to_array();
 
             // Add detail about the enrolment instance.
-
             $extradata[] = (new responses\enrol(
                 $instance->id,
                 'enrol',

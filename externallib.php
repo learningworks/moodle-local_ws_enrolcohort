@@ -701,7 +701,7 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// </editor-fold>
 
-    /// <editor-fold desc="Functions for get_instances(). TODO: All of this stuff.">
+    /// <editor-fold desc="Functions for get_instances().">
 
     /**
      * Returns description of the get_instances() function return value.
@@ -710,8 +710,8 @@ class local_ws_enrolcohort_external extends external_api {
      */
     public static function get_instances_parameters() {
         return new external_function_parameters([
-            self::QUERYSTRING_INSTANCE => new external_single_structure([
-                'courseid' => new external_value(PARAM_INT, 'The id of a course to get enrolment instances for.', VALUE_REQUIRED)
+            self::QUERYSTRING_COURSE => new external_single_structure([
+                'id' => new external_value(PARAM_INT, 'The id of a course to get enrolment instances for.', VALUE_REQUIRED)
             ])
         ]);
     }
@@ -829,14 +829,14 @@ class local_ws_enrolcohort_external extends external_api {
         global $DB, $SITE;
 
         // Check the parameters.
-        $params = self::validate_parameters(self::get_instances_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
+        $params = self::validate_parameters(self::get_instances_parameters(), [self::QUERYSTRING_COURSE => $params]);
 
         // A place for the errors and extra data.
         $errors = [];
         $extradata = [];
 
         // Get the courseid aka id.
-        $courseid = $params[self::QUERYSTRING_INSTANCE]['courseid'];
+        $courseid = $params[self::QUERYSTRING_COURSE]['id'];
 
         // Validate the courseid.
         if ($courseid == $SITE->id) {
@@ -913,7 +913,6 @@ class local_ws_enrolcohort_external extends external_api {
             } else {
                 $message = tools::get_string('getinstance:200', $a);
             }
-
         } else if ($code == 400) {
             $message = tools::get_string('getinstances:400');
         } else {

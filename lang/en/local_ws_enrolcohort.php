@@ -55,8 +55,8 @@ $string['enrolmentmethodnotavailable']  = 'Could not instantiate enrol_cohort.';
 $string['statusinvalid'] = 'Invalid status {$a}. Possible statuses are: 0 - active, 1 - not active.';
 
 // Strings for instance.
-$string['instancegroupnone']        = 'Enrol instance group none.';
-$string['instancenotexists']        = 'Unknown enrolment instance.';
+$string['instancegroupnone']    = 'Enrol instance group none.';
+$string['instancenotexists']    = 'Unknown enrolment instance.';
 
 // Strings for webservice function add_instance.
 $string['addinstance:201']                  = 'Cohort enrolment instance added.';

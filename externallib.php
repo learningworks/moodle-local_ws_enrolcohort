@@ -111,6 +111,107 @@ class local_ws_enrolcohort_external extends external_api {
     }
 
     /**
+     * The functions get_instances and delete_instance will return the following structure that shows details of
+     * the cohort enrolment instance including the related course, cohort, role assigned, and group.
+     *
+     * @return external_single_structure
+     */
+    private static function webservice_function_enrolment_instance_returns() {
+        // Definition of extra details for course in get enrolment instance/s.
+        $coursedetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the course'),
+                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the course'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the course'),
+                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the course'),
+                'visible'   => new external_value(PARAM_INT, 'The visibility of the course'),
+                'format'    => new external_value(PARAM_PLUGIN, 'The course format')
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for cohort in get enrolment instance/s.
+        $cohortdetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the cohort'),
+                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the cohort'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the cohort'),
+                'visible'   => new external_value(PARAM_INT, 'The visibility of the cohort')
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for role in get enrolment instance/s.
+        $roledetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the role'),
+                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the role'),
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for role in get enrolment instance/s.
+        $groupdetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the group'),
+                'courseid'  => new external_value(PARAM_INT, 'The id of the course this group belongs to'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the group'),
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        return new external_single_structure([
+            'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
+            'code'      => new external_value(PARAM_INT, 'HTTP status code'),
+            'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
+            'errors'    => new external_multiple_structure(
+                new external_single_structure(
+                    [
+                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
+                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
+                    ],
+                    'component errors',
+                    VALUE_OPTIONAL
+                )
+            ),
+            'data' => new external_multiple_structure(
+                new external_single_structure(
+                    [
+                        'object'    => new external_value(PARAM_TEXT, 'The object this is describing'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the object', VALUE_OPTIONAL),
+                        'name'      => new external_value(PARAM_TEXT, 'The name of the object', VALUE_OPTIONAL),
+                        'courseid'  => new external_value(PARAM_INT, 'The id of the related course', VALUE_OPTIONAL),
+                        'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort', VALUE_OPTIONAL),
+                        'roleid'    => new external_value(PARAM_INT, 'The id of the related role', VALUE_OPTIONAL),
+                        'groupid'   => new external_value(PARAM_INT, 'The id of the group', VALUE_OPTIONAL),
+                        'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the object', VALUE_OPTIONAL),
+                        'shortname' => new external_value(PARAM_TEXT, 'The shortname of the object', VALUE_OPTIONAL),
+                        'status'    => new external_value(PARAM_INT, 'The status of the object', VALUE_OPTIONAL),
+                        'active'    => new external_value(PARAM_TEXT, 'Enrolment instance is active or not', VALUE_OPTIONAL),
+                        'visible'   => new external_value(PARAM_INT, 'The visibility of the object', VALUE_OPTIONAL),
+                        'format'    => new external_value(PARAM_PLUGIN, 'The course format', VALUE_OPTIONAL),
+                        'course'    => $coursedetails,
+                        'cohort'    => $cohortdetails,
+                        'role'      => $roledetails,
+                        'group'     => $groupdetails
+                    ],
+                    'extra details',
+                    VALUE_OPTIONAL
+                )
+            )
+        ]);
+    }
+
+    /**
      * This function gets assignable roles for a course context.
      *
      * @param null $context
@@ -299,8 +400,7 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         // This is the important one. Check if the cohort enrolment instance is available for use.
-        $cohortenrolment = enrol_get_plugin('cohort');
-        if (!$cohortenrolment) {
+        if (!$cohortenrolment = enrol_get_plugin('cohort')) {
             $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
         }
 
@@ -576,8 +676,7 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         // This is the important one. Check if the cohort enrolment instance is available for use.
-        $cohortenrolment = enrol_get_plugin('cohort');
-        if (!$cohortenrolment) {
+        if (!$cohortenrolment = enrol_get_plugin('cohort')) {
             $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
         }
 
@@ -643,7 +742,7 @@ class local_ws_enrolcohort_external extends external_api {
 
     /// </editor-fold>
 
-    /// <editor-fold desc="Functions for delete_instance(). TODO: All of this stuff.">
+    /// <editor-fold desc="Functions for delete_instance().">
 
     /**
      * Returns description of the delete_instance() function parameters.
@@ -664,9 +763,18 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_single_structure
      */
     public static function delete_instance_returns() {
-        return self::webservice_function_returns();
+        return self::webservice_function_enrolment_instance_returns();
     }
 
+    /**
+     * Deletes a cohort enrolment instance.
+     *
+     * @param $params
+     * @return array
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     */
     public static function delete_instance($params) {
         global $DB;
 
@@ -682,14 +790,44 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the enrolment instance id.
         if (!$DB->record_exists('enrol', ['id' => $id, 'enrol' => 'cohort'])) {
-            $errors[] = (new responses\error($id, 'enrol', ''));
+            $errors[] = (new responses\error($id, 'enrol', 'instancenotexists'))->to_array();
+        }
+
+        // This is the important one. Check if the cohort enrolment instance is available for use.
+        if (!$cohortenrolment = enrol_get_plugin('cohort')) {
+            $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
         }
 
         // Set the HTTP response code.
         $code = empty($errors) ? 200 : 400;
 
         // Get the response message.
-        $message = tools::get_string("deleteinstance:{$code}");
+        if ($code == 200) {
+            // Get the enrolment instance Nelly ;).
+            $ei = $DB->get_record('enrol', ['id' => $id, 'enrol' => 'cohort']);
+
+            // Make a E.I. response.
+            $eiresponse = new responses\enrol($id, 'enrol', $ei->name, $ei->status, $ei->roleid, $ei->courseid, $ei->{self::FIELD_COHORT}, $ei->{self::FIELD_GROUP});
+
+            // Get other details about the deleted enrolment instance.
+            $eiresponse->set_course((new responses\course($ei->courseid))->to_array());
+            $eiresponse->set_cohort((new responses\cohort($ei->{self::FIELD_COHORT}))->to_array());
+            $eiresponse->set_role((new responses\role($ei->roleid))->to_array());
+            $eiresponse->set_group((new responses\group($ei->{self::FIELD_GROUP}, 'group', $ei->courseid))->to_array());
+
+            // Add the E.I. to the response.
+            $extradata[] = $eiresponse->to_array();
+
+            // Actuals delete the enrolment instance.
+            $cohortenrolment->delete_instance($ei);
+
+            // The following is a message of success.
+            $message = tools::get_string('deleteinstance:200');
+        } else if ($code == 400) {
+            $message = tools::get_string('deleteinstance:400');
+        } else {
+            $message = tools::get_string('unknownstatuscode');
+        }
 
         // Prepare the response and then send it.
         $response = [
@@ -726,98 +864,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_single_structure
      */
     public static function get_instances_returns() {
-        // Definition of extra details for course in get enrolment instance/s.
-        $coursedetails = new external_single_structure(
-            [
-                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
-                'id'        => new external_value(PARAM_INT, 'The id of the course'),
-                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the course'),
-                'name'      => new external_value(PARAM_TEXT, 'The name of the course'),
-                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the course'),
-                'visible'   => new external_value(PARAM_INT, 'The visibility of the course'),
-                'format'    => new external_value(PARAM_PLUGIN, 'The course format')
-            ],
-            'More detail about the course associated to a cohort enrolment instance',
-            VALUE_OPTIONAL
-        );
-
-        // Definition of extra details for cohort in get enrolment instance/s.
-        $cohortdetails = new external_single_structure(
-            [
-                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
-                'id'        => new external_value(PARAM_INT, 'The id of the cohort'),
-                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the cohort'),
-                'name'      => new external_value(PARAM_TEXT, 'The name of the cohort'),
-                'visible'   => new external_value(PARAM_INT, 'The visibility of the cohort')
-            ],
-            'More detail about the course associated to a cohort enrolment instance',
-            VALUE_OPTIONAL
-        );
-
-        // Definition of extra details for role in get enrolment instance/s.
-        $roledetails = new external_single_structure(
-            [
-                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
-                'id'        => new external_value(PARAM_INT, 'The id of the role'),
-                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the role'),
-            ],
-            'More detail about the course associated to a cohort enrolment instance',
-            VALUE_OPTIONAL
-        );
-
-        // Definition of extra details for role in get enrolment instance/s.
-        $groupdetails = new external_single_structure(
-            [
-                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
-                'id'        => new external_value(PARAM_INT, 'The id of the group'),
-                'courseid'  => new external_value(PARAM_INT, 'The id of the course this group belongs to'),
-                'name'      => new external_value(PARAM_TEXT, 'The name of the group'),
-            ],
-            'More detail about the course associated to a cohort enrolment instance',
-            VALUE_OPTIONAL
-        );
-
-        return new external_single_structure([
-            'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
-            'code'      => new external_value(PARAM_INT, 'HTTP status code'),
-            'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
-            'errors'    => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
-                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
-                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
-                    ],
-                    'component errors',
-                    VALUE_OPTIONAL
-                )
-            ),
-            'data' => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'object'    => new external_value(PARAM_TEXT, 'The object this is describing'),
-                        'id'        => new external_value(PARAM_INT, 'The id of the object', VALUE_OPTIONAL),
-                        'name'      => new external_value(PARAM_TEXT, 'The name of the object', VALUE_OPTIONAL),
-                        'courseid'  => new external_value(PARAM_INT, 'The id of the related course', VALUE_OPTIONAL),
-                        'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort', VALUE_OPTIONAL),
-                        'roleid'    => new external_value(PARAM_INT, 'The id of the related role', VALUE_OPTIONAL),
-                        'groupid'   => new external_value(PARAM_INT, 'The id of the group', VALUE_OPTIONAL),
-                        'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the object', VALUE_OPTIONAL),
-                        'shortname' => new external_value(PARAM_TEXT, 'The shortname of the object', VALUE_OPTIONAL),
-                        'status'    => new external_value(PARAM_INT, 'The status of the object', VALUE_OPTIONAL),
-                        'active'    => new external_value(PARAM_TEXT, 'Enrolment instance is active or not', VALUE_OPTIONAL),
-                        'visible'   => new external_value(PARAM_INT, 'The visibility of the object', VALUE_OPTIONAL),
-                        'format'    => new external_value(PARAM_PLUGIN, 'The course format', VALUE_OPTIONAL),
-                        'course'    => $coursedetails,
-                        'cohort'    => $cohortdetails,
-                        'role'      => $roledetails,
-                        'group'     => $groupdetails
-                    ],
-                    'extra details',
-                    VALUE_OPTIONAL
-                )
-            )
-        ]);
+        return self::webservice_function_enrolment_instance_returns();
     }
 
     /**
@@ -896,7 +943,7 @@ class local_ws_enrolcohort_external extends external_api {
                     $ei->set_course((new responses\course($enrolmentinstance->courseid))->to_array());
                     $ei->set_cohort((new responses\cohort($enrolmentinstance->{self::FIELD_COHORT}))->to_array());
                     $ei->set_role((new responses\role($enrolmentinstance->roleid))->to_array());
-                    $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}))->to_array());
+                    $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}, 'group', $enrolmentinstance->courseid))->to_array());
 
                     $extradata[] = $ei->to_array();
 

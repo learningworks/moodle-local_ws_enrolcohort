@@ -711,7 +711,7 @@ class local_ws_enrolcohort_external extends external_api {
     public static function get_instances_parameters() {
         return new external_function_parameters([
             self::QUERYSTRING_INSTANCE => new external_single_structure([
-                'courseid' => new external_value(PARAM_INT, 'The id of a course to get enrolment instances for.', VALUE_OPTIONAL, self::GET_INSTANCES_COURSEID_ALL)
+                'courseid' => new external_value(PARAM_INT, 'The id of a course to get enrolment instances for.', VALUE_REQUIRED)
             ])
         ]);
     }
@@ -722,10 +722,112 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_single_structure
      */
     public static function get_instances_returns() {
-        return self::webservice_function_returns();
+        // Definition of extra details for course in get enrolment instance/s.
+        $coursedetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the course'),
+                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the course'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the course'),
+                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the course'),
+                'visible'   => new external_value(PARAM_INT, 'The visibility of the course'),
+                'format'    => new external_value(PARAM_PLUGIN, 'The course format')
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for cohort in get enrolment instance/s.
+        $cohortdetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the cohort'),
+                'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the cohort'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the cohort'),
+                'visible'   => new external_value(PARAM_INT, 'The visibility of the cohort')
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for role in get enrolment instance/s.
+        $roledetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the role'),
+                'shortname' => new external_value(PARAM_TEXT, 'The shortname of the role'),
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        // Definition of extra details for role in get enrolment instance/s.
+        $groupdetails = new external_single_structure(
+            [
+                'object'    => new external_value(PARAM_TEXT, 'The type of object'),
+                'id'        => new external_value(PARAM_INT, 'The id of the group'),
+                'courseid'  => new external_value(PARAM_INT, 'The id of the course this group belongs to'),
+                'name'      => new external_value(PARAM_TEXT, 'The name of the group'),
+            ],
+            'More detail about the course associated to a cohort enrolment instance',
+            VALUE_OPTIONAL
+        );
+
+        return new external_single_structure([
+            'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
+            'code'      => new external_value(PARAM_INT, 'HTTP status code'),
+            'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
+            'errors'    => new external_multiple_structure(
+                new external_single_structure(
+                    [
+                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
+                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
+                    ],
+                    'component errors',
+                    VALUE_OPTIONAL
+                )
+            ),
+            'data' => new external_multiple_structure(
+                new external_single_structure(
+                    [
+                        'object'    => new external_value(PARAM_TEXT, 'The object this is describing'),
+                        'id'        => new external_value(PARAM_INT, 'The id of the object', VALUE_OPTIONAL),
+                        'name'      => new external_value(PARAM_TEXT, 'The name of the object', VALUE_OPTIONAL),
+                        'courseid'  => new external_value(PARAM_INT, 'The id of the related course', VALUE_OPTIONAL),
+                        'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort', VALUE_OPTIONAL),
+                        'roleid'    => new external_value(PARAM_INT, 'The id of the related role', VALUE_OPTIONAL),
+                        'groupid'   => new external_value(PARAM_INT, 'The id of the group', VALUE_OPTIONAL),
+                        'idnumber'  => new external_value(PARAM_RAW, 'The idnumber of the object', VALUE_OPTIONAL),
+                        'shortname' => new external_value(PARAM_TEXT, 'The shortname of the object', VALUE_OPTIONAL),
+                        'status'    => new external_value(PARAM_INT, 'The status of the object', VALUE_OPTIONAL),
+                        'active'    => new external_value(PARAM_TEXT, 'Enrolment instance is active or not', VALUE_OPTIONAL),
+                        'visible'   => new external_value(PARAM_INT, 'The visibility of the object', VALUE_OPTIONAL),
+                        'format'    => new external_value(PARAM_PLUGIN, 'The course format', VALUE_OPTIONAL),
+                        'course'    => $coursedetails,
+                        'cohort'    => $cohortdetails,
+                        'role'      => $roledetails,
+                        'group'     => $groupdetails
+                    ],
+                    'extra details',
+                    VALUE_OPTIONAL
+                )
+            )
+        ]);
     }
 
+    /**
+     * Gets the enrolment instances for a course or the entire site.
+     *
+     * @param $params
+     * @return array
+     * @throws coding_exception
+     * @throws dml_exception
+     * @throws invalid_parameter_exception
+     */
     public static function get_instances($params) {
+        global $DB, $SITE;
+
         // Check the parameters.
         $params = self::validate_parameters(self::get_instances_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
 
@@ -737,12 +839,86 @@ class local_ws_enrolcohort_external extends external_api {
         $courseid = $params[self::QUERYSTRING_INSTANCE]['courseid'];
 
         // Validate the courseid.
+        if ($courseid == $SITE->id) {
+            $errors[] = (new responses\error(-1, 'course', 'getinstances:courseissite'))->to_array();
+        } else if (!$DB->record_exists('course', ['id' => $courseid]) && $courseid != -1) {
+            $errors[] = (new responses\error($courseid, 'course', 'coursenotexists'))->to_array();
+        }
 
         // Set the HTTP status code.
         $code = empty($errors) ? 200 : 400;
 
-        // Get the response message based on the HTTP status code.
-        $message = tools::get_string("getinstances:{$code}");
+        // Get the response message based on the HTTP status code and get things if 200.
+        if ($code == 200) {
+            // Get the courses.
+            if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
+                $courses = $DB->get_records('course');
+            } else {
+                $courses = $DB->get_records('course', ['id' => $courseid]);
+            }
+
+            $foundsitecourse = false;
+            $numberofenrolmentmethods = 0;
+
+            foreach ($courses as $course) {
+                // Skip the site course.
+                if ($course->id == $SITE->id) {
+                    $foundsitecourse = true;
+                    continue;
+                }
+
+                // Skip courses that don't have cohort enrolment methods.
+                if (!$DB->record_exists('enrol', ['enrol' => 'cohort', 'courseid' => $course->id])) {
+                    continue;
+                }
+
+                // Get the cohort enrolment instances for this course.
+                $enrolmentinstances = $DB->get_records('enrol', ['enrol' => 'cohort', 'courseid' => $course->id]);
+
+                foreach ($enrolmentinstances as $enrolmentinstance) {
+                    // Make some info about the enrolment instance.
+                    $ei = new responses\enrol(
+                        $enrolmentinstance->id,
+                        'enrol',
+                        $enrolmentinstance->name,
+                        $enrolmentinstance->status,
+                        $enrolmentinstance->roleid,
+                        $enrolmentinstance->courseid,
+                        $enrolmentinstance->{self::FIELD_COHORT},
+                        $enrolmentinstance->{self::FIELD_GROUP}
+                    );
+
+                    // Get other details about the enrolment instance.
+                    $ei->set_course((new responses\course($enrolmentinstance->courseid))->to_array());
+                    $ei->set_cohort((new responses\cohort($enrolmentinstance->{self::FIELD_COHORT}))->to_array());
+                    $ei->set_role((new responses\role($enrolmentinstance->roleid))->to_array());
+                    $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}))->to_array());
+
+                    $extradata[] = $ei->to_array();
+
+                    $numberofenrolmentmethods += 1;
+                }
+            }
+
+            // Count things and make langstring placeholders.
+            $numberofcourses = count($courses);
+            if ($foundsitecourse) {
+                $numberofcourses -= 1;
+            }
+
+            $a = (object)['courseid' => $courseid, 'numberofenrolmentinstances' => $numberofenrolmentmethods, 'numberofcourses' => $numberofcourses];
+
+            if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
+                $message = tools::get_string('getinstances:200', $a);
+            } else {
+                $message = tools::get_string('getinstance:200', $a);
+            }
+
+        } else if ($code == 400) {
+            $message = tools::get_string('getinstances:400');
+        } else {
+            $message = tools::get_string('unknownstatuscode', $code);
+        }
 
         // Prepare the response.
         $response = [

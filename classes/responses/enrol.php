@@ -59,6 +59,26 @@ class enrol extends response {
      */
     protected $groupid;
 
+    /**
+     * @var $course         More detail about the course associated to this enrolment instance.
+     */
+    protected $course;
+
+    /**
+     * @var $cohort         More detail about the cohort associated to this enrolment instance.
+     */
+    protected $cohort;
+
+    /**
+     * @var $role           More detail about the role associated to this enrolment instance.
+     */
+    protected $role;
+
+    /**
+     * @var $group          More detail about the group associated to this enrolment instance.
+     */
+    protected $group;
+
     public function __construct($id = 0, $object = 'enrol', $name = '', $status = 0, $roleid = 0, $courseid = 0, $cohortid = 0, $groupid = 0) {
         parent::__construct($id, $object);
 
@@ -69,5 +89,41 @@ class enrol extends response {
         $this->courseid = $courseid;
         $this->cohortid = $cohortid;
         $this->groupid  = $groupid;
+    }
+
+    /**
+     * Set the details about the course for this enrolment method.
+     *
+     * @param $course
+     */
+    public function set_course($course) {
+        $this->course = $course;
+    }
+
+    /**
+     * Set the details about the cohort for this enrolment method.
+     *
+     * @param $cohort
+     */
+    public function set_cohort($cohort) {
+        $this->cohort = $cohort;
+    }
+
+    /**
+     * Set the details about the role for this enrolment method.
+     *
+     * @param $role
+     */
+    public function set_role($role) {
+        $this->role = $role;
+    }
+
+    /**
+     * Set the details about the group for this enrolment method.
+     *
+     * @param $group
+     */
+    public function set_group($group) {
+        $this->group = $group;
     }
 }

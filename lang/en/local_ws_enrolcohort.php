@@ -75,8 +75,10 @@ $string['deleteinstance:200'] = 'Cohort enrolment instance deleted.';
 $string['deleteinstance:400'] = 'Could not delete cohort enrolment instance.';
 
 // Strings for webservice function get_instances.
-$string['getinstances:200'] = 'Could get cohort enrolment instances.';
+$string['getinstance:200'] = 'Found {$a->numberofenrolmentinstances} cohort enrolment instances for the course with id {$a->courseid}.';
+$string['getinstances:200'] = 'Found {$a->numberofenrolmentinstances} cohort enrolment instances in {$a->numberofcourses} courses (All courses).';
 $string['getinstances:400'] = 'Could not get cohort enrolment instances.';
+$string['getinstances:courseissite']    = 'Can not get instances for the site course.';
 
 // String for an unknown HTTP status code.
 $string['unknownstatuscode'] = 'Unknown status code {$a}.';

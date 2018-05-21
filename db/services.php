@@ -33,7 +33,7 @@ $functions = [
         'methodname'    => 'add_instance',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Adds a new cohort sync enrolment instance to the specified course.',
-        'capabilities'  => 'moodle/cohort:view, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => 'moodle/cohort:view, moodle/role:assign, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
         'type'          => 'create'
     ],
     'local_ws_enrolcohort_update_instance' => [
@@ -41,7 +41,7 @@ $functions = [
         'methodname'    => 'update_instance',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Updates an existing cohort enrolment instance.',
-        'capabilities'  => 'moodle/cohort:view, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => 'moodle/role:assign, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
         'type'          => 'update'
     ],
     'local_ws_enrolcohort_delete_instance' => [

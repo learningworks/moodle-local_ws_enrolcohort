@@ -70,7 +70,7 @@ class local_ws_enrolcohort_external extends external_api {
      *
      * @return external_single_structure
      */
-    private static function webservice_function_returns() {
+    public static function webservice_function_returns() {
         return new external_single_structure([
             'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
             'code'      => new external_value(PARAM_INT, 'HTTP status code'),
@@ -116,7 +116,7 @@ class local_ws_enrolcohort_external extends external_api {
      *
      * @return external_single_structure
      */
-    private static function webservice_function_enrolment_instance_returns() {
+    public static function webservice_function_enrolment_instance_returns() {
         // Definition of extra details for course in get enrolment instance/s.
         $coursedetails = new external_single_structure(
             [
@@ -217,7 +217,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @param null $context
      * @return array
      */
-    private static function get_assignable_roles($context = null) {
+    public static function get_assignable_roles($context = null) {
         return $context instanceof \context_course ? get_assignable_roles($context) : [];
     }
 
@@ -231,7 +231,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @param string $parametername
      * @return mixed
      */
-    private static function add_instance_get_parameter_default_value($parametername = '') {
+    public static function add_instance_get_parameter_default_value($parametername = '') {
         // Just ask for the right things and one shall receive. We shan't be making any mistakes.
         return self::add_instance_parameters()->keys[self::QUERYSTRING_INSTANCE]->keys[$parametername]->default;
     }
@@ -350,9 +350,13 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         // Get the group.
-        $groupid = $params[self::QUERYSTRING_INSTANCE]['groupid'];
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['groupid'])) {
+            $groupid = self::add_instance_get_parameter_default_value('groupid');
+        } else {
+            $groupid = $params[self::QUERYSTRING_INSTANCE]['groupid'];
+        }
 
-        // Validate the role. This is optional.
+        // Validate the group. This is optional.
         if (!is_null($groupid)) {
             $groupcreatemodes = [self::COHORT_GROUP_CREATE_NONE, self::COHORT_GROUP_CREATE_NEW];
             if (!in_array($groupid, $groupcreatemodes) && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
@@ -365,11 +369,10 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         // Validate the name of the cohort enrolment instance. This is optional.
-        $name = $params[self::QUERYSTRING_INSTANCE]['name'];
-
-        if (is_null($name)) {
-            // Get the default value for the name.
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['name'])) {
             $name = self::add_instance_get_parameter_default_value('name');
+        } else {
+            $name = $params[self::QUERYSTRING_INSTANCE]['name'];
         }
 
         // Check the users capabilities to ensure that they can do this.
@@ -390,7 +393,11 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         // Validate the status and set to a default.
-        $status = $params[self::QUERYSTRING_INSTANCE]['status'];
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['status'])) {
+            $status = self::add_instance_get_parameter_default_value('status');
+        } else {
+            $status = $params[self::QUERYSTRING_INSTANCE]['status'];
+        }
 
         if (!is_null($status) && !in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
             $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();

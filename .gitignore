@@ -9,6 +9,7 @@
 #
 # See gitignore(5) man page for more details
 #
+exampleresponses.json
 /config.php
 /lib/editor/tinymce/extra/tools/temp/
 *~

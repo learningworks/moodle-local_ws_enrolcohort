@@ -29,8 +29,20 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once("$CFG->libdir/externallib.php");
 
-use \local_ws_enrolcohort\tools as tools;
-use \local_ws_enrolcohort\responses as responses;
+use \local_ws_enrolcohort\tools;
+use \local_ws_enrolcohort\responses;
+
+use \local_ws_enrolcohort\exceptions\course_not_found_exception;
+use \local_ws_enrolcohort\exceptions\cohort_not_found_exception;
+use \local_ws_enrolcohort\exceptions\role_not_found_exception;
+use \local_ws_enrolcohort\exceptions\group_not_found_exception;
+use \local_ws_enrolcohort\exceptions\course_is_site_exception;
+use \local_ws_enrolcohort\exceptions\cohort_not_available_at_context_exception;
+use \local_ws_enrolcohort\exceptions\role_not_assignable_at_context_exception;
+use \local_ws_enrolcohort\exceptions\invalid_status_exception;
+use \local_ws_enrolcohort\exceptions\cohort_enrol_method_not_available_exception;
+use \local_ws_enrolcohort\exceptions\cohort_enrol_instance_already_synced_with_role_exception;
+use \local_ws_enrolcohort\exceptions\cohort_enrol_instance_not_found_exception;
 
 class local_ws_enrolcohort_external extends external_api {
 
@@ -75,17 +87,6 @@ class local_ws_enrolcohort_external extends external_api {
             'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
             'code'      => new external_value(PARAM_INT, 'HTTP status code'),
             'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
-            'errors'    => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
-                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
-                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
-                    ],
-                    'component errors',
-                    VALUE_OPTIONAL
-                )
-            ),
             'data' => new external_multiple_structure(
                 new external_single_structure(
                     [
@@ -172,17 +173,6 @@ class local_ws_enrolcohort_external extends external_api {
             'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance'),
             'code'      => new external_value(PARAM_INT, 'HTTP status code'),
             'message'   => new external_value(PARAM_TEXT, 'Human readable response message'),
-            'errors'    => new external_multiple_structure(
-                new external_single_structure(
-                    [
-                        'object'    => new external_value(PARAM_TEXT, 'The object that failed'),
-                        'id'        => new external_value(PARAM_INT, 'The id of the failed object'),
-                        'message'   => new external_value(PARAM_TEXT, 'Human readable response message')
-                    ],
-                    'component errors',
-                    VALUE_OPTIONAL
-                )
-            ),
             'data' => new external_multiple_structure(
                 new external_single_structure(
                     [
@@ -271,6 +261,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @throws coding_exception
      * @throws dml_exception
      * @throws invalid_parameter_exception
+     * @throws moodle_exception
      */
     public static function add_instance($params) {
         global $CFG, $DB, $SITE;
@@ -280,56 +271,40 @@ class local_ws_enrolcohort_external extends external_api {
         // Check the call for parameters.
         $params = self::validate_parameters(self::add_instance_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
 
-        // In case of errors.
-        $errors = [];
-
         // Other data.
         $extradata = [];
 
         // Get the course.
         $courseid = $params[self::QUERYSTRING_INSTANCE]['courseid'];
 
-        // Initial context.
-        $context = null;
-
         // Validate the course. This is required.
         if ($courseid == $SITE->id) {
-            $errors[] = (new responses\error($courseid, 'course', 'addinstance:courseissite'))->to_array();
-
-            // Set the context to system for validation.
-            $context = \context_system::instance();
+            throw new course_is_site_exception();
         } else if (!$DB->record_exists('course', ['id' => $courseid])) {
-            $errors[] = (new responses\error($courseid, 'course', 'coursenotexists'))->to_array();
-        } else {
-            // Set the context to course for validation.
-            $context = \context_course::instance($courseid);
-
-            // Add info to the response object.
-            $extradata[] = (new responses\course($courseid))->to_array();
+            throw new course_not_found_exception($courseid);
         }
+
+        // Set the context to course for validation.
+        $context = \context_course::instance($courseid);
+
+        // Add info to the response object.
+        $extradata[] = (new responses\course($courseid))->to_array();
 
         // Get the cohort. This is required
         $cohortid = $params[self::QUERYSTRING_INSTANCE]['cohortid'];
 
         // Validate the cohort. This is required.
         if (!$DB->record_exists('cohort', ['id' => $cohortid])) {
-            $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotexists'))->to_array();
-        } else if ($context instanceof \context_system) {
-            // Add some info to the response object.
-            $extradata[] = (new responses\cohort($cohortid))->to_array();
+            throw new cohort_not_found_exception($cohortid);
+        }
 
-            $errors[] = (new responses\error($cohortid, 'cohortsite', 'cohortnotavailableatcontext'))->to_array();
-        } else if ($context instanceof \context_course) {
-            // Add some info to the response object.
-            $extradata[] = (new responses\cohort($cohortid))->to_array();
+        // Add some info to the response object.
+        $extradata[] = (new responses\cohort($cohortid))->to_array();
 
-            // Get the available cohorts.
-            $availablecohorts = cohort_get_available_cohorts($context);
-            if (empty($availablecohorts) || !isset($availablecohorts[$cohortid])) {
-                $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnotavailableatcontext'))->to_array();
-            }
-        } else if (is_null($context)) {
-            $errors[] = (new responses\error($cohortid, 'cohort', 'cohortnullcontext'))->to_array();
+        // Get the available cohorts.
+        $availablecohorts = cohort_get_available_cohorts($context);
+        if (empty($availablecohorts) || !isset($availablecohorts[$cohortid])) {
+            throw new cohort_not_available_at_context_exception($cohortid);
         }
 
         // Get the role.
@@ -340,14 +315,13 @@ class local_ws_enrolcohort_external extends external_api {
 
         if (!$DB->record_exists('role', ['id' => $roleid])) {
             // Role doesn't exist.
-            $errors[] = (new responses\error($roleid, 'role', 'rolenotexists'))->to_array();
+            throw new role_not_found_exception($roleid);
         } else if (empty($assignableroles) || !isset($assignableroles[$roleid])) {
             // Role is not assignable at this context.
-            $errors[] = (new responses\error($roleid, 'role', 'rolenotassignablehere'))->to_array();
-
-            // Role exists. Add some info to the response object.
-            $extradata[] = (new responses\role($roleid))->to_array();
+            throw new role_not_assignable_at_context_exception($roleid);
         }
+
+        $extradata[] = (new responses\role($roleid))->to_array();
 
         // Get the group.
         if (!isset($params[self::QUERYSTRING_INSTANCE]['groupid'])) {
@@ -361,7 +335,7 @@ class local_ws_enrolcohort_external extends external_api {
             $groupcreatemodes = [self::COHORT_GROUP_CREATE_NONE, self::COHORT_GROUP_CREATE_NEW];
             if (!in_array($groupid, $groupcreatemodes) && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
                 // Provided group id doesn't exist for this course.
-                $errors[] = (new responses\error($groupid, 'group', 'groupnotexists'))->to_array();
+                throw new group_not_found_exception($groupid);
             }
         } else {
             // Get the default value specified for the parameter groupid.
@@ -378,17 +352,11 @@ class local_ws_enrolcohort_external extends external_api {
         // Check the users capabilities to ensure that they can do this.
         if ($context instanceof \context_course) {
             // Check that the user has the required capabilities for the course context.
-            $requiredcapabilities = ['moodle/cohort:view', 'moodle/course:managegroups', 'moodle/role:assign'];
+            $requiredcapabilities = ['moodle/course:enrolconfig', 'enrol/cohort:config', 'moodle/cohort:view', 'moodle/course:managegroups', 'moodle/role:assign'];
             foreach ($requiredcapabilities as $requiredcapability) {
                 if (!has_capability($requiredcapability, $context)) {
-                    $errors[] = (new responses\error(null, 'capability', 'usermissingrequiredcapability', $requiredcapability))->to_array();
+                    throw new required_capability_exception($context, $requiredcapability, 'nopermissions', '');
                 }
-            }
-
-            // Check that the user has the capability to enrol config (cohort and moodle course level).
-            $anycapability = ['moodle/course:enrolconfig', 'enrol/cohort:config'];
-            if (!has_any_capability($anycapability, $context)) {
-                $errors[] = (new responses\error(null, 'capability', 'usermissinganycapability', '\''.implode('\', \'', $anycapability).'\''))->to_array();
             }
         }
 
@@ -400,7 +368,7 @@ class local_ws_enrolcohort_external extends external_api {
         }
 
         if (!is_null($status) && !in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
-            $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();
+            throw new invalid_status_exception($status);
         } else {
             // Set status to the default.
             $status = self::add_instance_get_parameter_default_value('status');
@@ -408,7 +376,7 @@ class local_ws_enrolcohort_external extends external_api {
 
         // This is the important one. Check if the cohort enrolment instance is available for use.
         if (!$cohortenrolment = enrol_get_plugin('cohort')) {
-            $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
+            throw new cohort_enrol_method_not_available_exception();
         }
 
         // Prepare the data to be returned as the response.
@@ -421,41 +389,16 @@ class local_ws_enrolcohort_external extends external_api {
             'status'    => $status
         ];
 
-        // Set the HTTP status code.
-        $code = empty($errors) ? 201 : 400;
-
-        // Set the response message.
-        if ($code == 201) {
-            $message = tools::get_string('addinstance:201');
-        } else if ($code == 400) {
-            $message = tools::get_string('addinstance:400');
-        } else {
-            $message = tools::get_string('unknownstatuscode', $code);
-        }
+        // We are anticipating a success.
+        $code = 201;
+        $message = tools::get_string('addinstance:201', $code);
 
         // The initial response. The field id will be filled in later.
         $response = [
             'code'      => $code,
             'message'   => $message,
-            'errors'    => $errors,
             'data'      => $extradata
         ];
-
-        if (!empty($errors)) {
-            // Return now due to errors.
-            $response['id'] = self::WEBSERVICE_FUNCTION_CALL_HAS_ERRORS_ID;
-
-            return $response;
-        }
-
-        // Get the full course object.
-        $course = $DB->get_record('course', ['id' => $courseid]);
-
-        // Add data about the course to the response.
-        $extradata[] = (new responses\course($courseid))->to_array();
-
-        // Add data about the cohort.
-        $extradata[] = (new responses\cohort($cohortid))->to_array();
 
         // Prepare the fields.
         $fields = [
@@ -481,28 +424,12 @@ class local_ws_enrolcohort_external extends external_api {
         if ($DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
             // Don't add instance. Send an error response.
             $instance = $DB->get_record_select('enrol', $sqlwhere, $sqlparams);
-            $errors[] = (new responses\error($instance->id, 'instance', 'addinstance:cohortalreadysynced'))->to_array();
 
-            // Add detail about the enrolment instance.
-            $extradata[] = (new responses\enrol(
-                $instance->id,
-                'enrol',
-                $instance->name,
-                $instance->status,
-                $instance->roleid,
-                $instance->courseid,
-                $instance->{self::FIELD_COHORT},
-                $instance->{self::FIELD_GROUP}
-            ))->to_array();
-
-            $response['id']         = $fields['id'];
-            $response['code']       = 400;
-            $response['errors']     = $errors;
-            $response['message']    = tools::get_string("addinstance:{$response['code']}");
-            $response['data']       = $extradata;
-
-            return $response;
+            throw new cohort_enrol_instance_already_synced_with_role_exception($instance->id, $roleid);
         }
+
+        // Get the full course object.
+        $course = $DB->get_record('course', ['id' => $courseid]);
 
         // After all that hard work we can now add the instance.
         $response['id'] = $cohortenrolment->add_instance($course, $fields);
@@ -536,6 +463,17 @@ class local_ws_enrolcohort_external extends external_api {
     /// <editor-fold desc="Functions for update_instance().">
 
     /**
+     * Gets the default value for an add_instance() parameter. Use properly. No error checking happens.
+     *
+     * @param string $parametername
+     * @return mixed
+     */
+    public static function update_instance_get_parameter_default_value($parametername = '') {
+        // Just ask for the right things and one shall receive. We shan't be making any mistakes.
+        return self::update_instance_parameters()->keys[self::QUERYSTRING_INSTANCE]->keys[$parametername]->default;
+    }
+
+    /**
      * Returns description of the update_instance() function parameters.
      *
      * @return external_function_parameters
@@ -544,7 +482,7 @@ class local_ws_enrolcohort_external extends external_api {
         return new external_function_parameters([
             self::QUERYSTRING_INSTANCE => new external_single_structure([
                 'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance.', VALUE_REQUIRED),
-                'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL),
+                'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL, ''),
                 'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL),
                 'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL),
                 'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL)
@@ -569,15 +507,13 @@ class local_ws_enrolcohort_external extends external_api {
      * @throws coding_exception
      * @throws dml_exception
      * @throws invalid_parameter_exception
+     * @throws moodle_exception
      */
     public static function update_instance($params) {
         global $DB, $SITE;
 
         // Check the call for parameters.
         $params = self::validate_parameters(self::update_instance_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
-
-        // A place for errors.
-        $errors = [];
 
         // Other data.
         $extradata = [];
@@ -598,31 +534,43 @@ class local_ws_enrolcohort_external extends external_api {
         $enrolmentinstance = null;
 
         if (!$DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
-            $errors[] = (new responses\error($id, 'instanceid', 'instancenotexists'))->to_array();
+            throw new cohort_enrol_instance_not_found_exception('cohort', 'id', $id);
         } else {
             $enrolmentinstance = $DB->get_record_select('enrol', $sqlwhere, $sqlparams);
             $context = \context_course::instance($enrolmentinstance->courseid);
         }
 
         // Get the enrolment instance name.
-        $name = $params[self::QUERYSTRING_INSTANCE]['name'];
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['name'])) {
+            $name = $enrolmentinstance->name;
+        } else {
+            $name = $params[self::QUERYSTRING_INSTANCE]['name'];
+        }
 
         if (!empty($name)) {
             $data->name = $name;
         }
 
         // Get the enrolment instance status.
-        $status = $params[self::QUERYSTRING_INSTANCE]['status'];
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['status'])) {
+            $status = $enrolmentinstance->status;
+        } else {
+            $status = $params[self::QUERYSTRING_INSTANCE]['status'];
+        }
 
         // Validate the enrolment instance status.
         if (!is_null($status) && !in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
-            $errors[] = (new responses\error(null, 'status', 'statusinvalid', $status))->to_array();
+            throw new invalid_status_exception($status);
         } else if (!is_null($status) && in_array($status, [ENROL_INSTANCE_ENABLED, ENROL_INSTANCE_DISABLED])) {
             $data->status = $status;
         }
 
         // Get the enrolment instance role id.
-        $roleid = $params[self::QUERYSTRING_INSTANCE]['roleid'];
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['roleid'])) {
+            $roleid = $enrolmentinstance->roleid;
+        } else {
+            $roleid = $params[self::QUERYSTRING_INSTANCE]['roleid'];
+        }
 
         if (!empty($roleid)) {
             // Validate the role. This is required.
@@ -630,32 +578,32 @@ class local_ws_enrolcohort_external extends external_api {
 
             if (!$DB->record_exists('role', ['id' => $roleid])) {
                 // Role doesn't exist.
-                $errors[] = (new responses\error($roleid, 'role', 'rolenotexists'))->to_array();
+                throw new role_not_found_exception($roleid);
             } else if (empty($assignableroles) || !isset($assignableroles[$roleid])) {
                 // Role is not assignable at this context.
-                $errors[] = (new responses\error($roleid, 'role', 'rolenotassignablehere'))->to_array();
-
-                // Role exists. Add some info to the response object.
-                $extradata[] = (new responses\role($roleid))->to_array();
+                throw new role_not_assignable_at_context_exception($roleid);
             } else {
                 $data->roleid = $roleid;
             }
         }
 
         // Get the group id.
-        $groupid = $params[self::QUERYSTRING_INSTANCE]['groupid'];
-
+        if (!isset($params[self::QUERYSTRING_INSTANCE]['groupid'])) {
+            $groupid = $enrolmentinstance->{self::FIELD_GROUP};
+        } else {
+            $groupid = $params[self::QUERYSTRING_INSTANCE]['groupid'];
+        }
         // Validate the group id.
         if (!empty($groupid)) {
             $groupcreatemodes = [self::COHORT_GROUP_CREATE_NONE, self::COHORT_GROUP_CREATE_NEW];
             $groupexistsforcourse = $DB->record_exists('groups', ['courseid' => $enrolmentinstance->courseid, 'id' => $groupid]);
             if (!in_array($groupid, $groupcreatemodes) && !is_null($enrolmentinstance) && !$groupexistsforcourse) {
                 // Provided group id doesn't exist for this course.
-                $errors[] = (new responses\error($groupid, 'group', 'groupnotexists'))->to_array();
-            } else {
-                $data->{self::FIELD_GROUP} = $groupid;
+                throw new group_not_found_exception($groupid);
             }
         }
+
+        $data->{self::FIELD_GROUP} = $groupid;
 
         // Return the supplied parameters.
         $extradata[] = [
@@ -670,10 +618,7 @@ class local_ws_enrolcohort_external extends external_api {
         // Check for things that are the same.
         if ($enrolmentinstance instanceof \stdClass && $context instanceof \context_course) {
             foreach ($data as $property => $value) {
-                if (isset($enrolmentinstance->$property) && $enrolmentinstance->$property == $value) {
-                    // Removing unnecessary updation data.
-                    unset($data->$property);
-                } else if (isset($enrolmentinstance->$property) && $enrolmentinstance->$property != $value) {
+                if (isset($enrolmentinstance->$property) && $enrolmentinstance->$property != $value) {
                     // Add role detail to the response object.
                     if (\core_text::strtolower($property) == 'roleid') {
                         $extradata[] = (new responses\role($value))->to_array();
@@ -684,16 +629,16 @@ class local_ws_enrolcohort_external extends external_api {
 
         // This is the important one. Check if the cohort enrolment instance is available for use.
         if (!$cohortenrolment = enrol_get_plugin('cohort')) {
-            $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
+            throw new cohort_enrol_method_not_available_exception();
         }
 
-        // The HTTP response code.
-        $code = empty($errors) ? 200 : 400;
+        // Check the params passed aka only id is passed
+        $noupdations = count($params[self::QUERYSTRING_INSTANCE]) === 1 && isset($params[self::QUERYSTRING_INSTANCE]['id']);
 
         // Response message.
-        if (empty((array)$data) && $code != 400) {
+        if ($noupdations) {
             $message = tools::get_string('updateinstance:nochange');
-        } else if ($code == 200) {
+        } else {
             $message = tools::get_string('updateinstance:200');
 
             // Add the cohort id to the data.
@@ -728,19 +673,16 @@ class local_ws_enrolcohort_external extends external_api {
                 $enrolmentinstance->{self::FIELD_COHORT},
                 $enrolmentinstance->{self::FIELD_GROUP}
             ))->to_array();
-        } else if ($code == 400) {
-            $message = tools::get_string('updateinstance:400');
-        } else {
-            // Unknown.
-            $message = tools::get_string('unknownstatuscode', $code);
         }
+
+        // The HTTP status code.
+        $code = 200;
 
         // Prepare the response.
         $response = [
             'id'        => $id,
             'code'      => $code,
             'message'   => $message,
-            'errors'    => $errors,
             'data'      => $extradata
         ];
 
@@ -781,6 +723,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @throws coding_exception
      * @throws dml_exception
      * @throws invalid_parameter_exception
+     * @throws moodle_exception
      */
     public static function delete_instance($params) {
         global $DB;
@@ -788,8 +731,6 @@ class local_ws_enrolcohort_external extends external_api {
         // Check the parameters.
         $params = self::validate_parameters(self::delete_instance_parameters(), [self::QUERYSTRING_INSTANCE => $params]);
 
-        // A place for the errors and extra data.
-        $errors = [];
         $extradata = [];
 
         // Get the enrolment instance id.
@@ -797,51 +738,44 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the enrolment instance id.
         if (!$DB->record_exists('enrol', ['id' => $id, 'enrol' => 'cohort'])) {
-            $errors[] = (new responses\error($id, 'enrol', 'instancenotexists'))->to_array();
+            throw new cohort_enrol_instance_not_found_exception('enrol', 'id', $id);
         }
 
         // This is the important one. Check if the cohort enrolment instance is available for use.
         if (!$cohortenrolment = enrol_get_plugin('cohort')) {
-            $errors[] = (new responses\error(null, 'enrol_plugin', 'enrolmentmethodnotavailable'))->to_array();
+            throw new cohort_enrol_method_not_available_exception();
         }
 
         // Set the HTTP response code.
-        $code = empty($errors) ? 200 : 400;
+        $code = 200;
 
-        // Get the response message.
-        if ($code == 200) {
-            // Get the enrolment instance Nelly ;).
-            $ei = $DB->get_record('enrol', ['id' => $id, 'enrol' => 'cohort']);
+        // Get the enrolment instance Nelly ;).
+        $ei = $DB->get_record('enrol', ['id' => $id, 'enrol' => 'cohort']);
 
-            // Make a E.I. response.
-            $eiresponse = new responses\enrol($id, 'enrol', $ei->name, $ei->status, $ei->roleid, $ei->courseid, $ei->{self::FIELD_COHORT}, $ei->{self::FIELD_GROUP});
+        // Make a E.I. response.
+        $eiresponse = new responses\enrol($id, 'enrol', $ei->name, $ei->status, $ei->roleid, $ei->courseid, $ei->{self::FIELD_COHORT}, $ei->{self::FIELD_GROUP});
 
-            // Get other details about the deleted enrolment instance.
-            $eiresponse->set_course((new responses\course($ei->courseid))->to_array());
-            $eiresponse->set_cohort((new responses\cohort($ei->{self::FIELD_COHORT}))->to_array());
-            $eiresponse->set_role((new responses\role($ei->roleid))->to_array());
-            $eiresponse->set_group((new responses\group($ei->{self::FIELD_GROUP}, 'group', $ei->courseid))->to_array());
+        // Get other details about the deleted enrolment instance.
+        $eiresponse->set_course((new responses\course($ei->courseid))->to_array());
+        $eiresponse->set_cohort((new responses\cohort($ei->{self::FIELD_COHORT}))->to_array());
+        $eiresponse->set_role((new responses\role($ei->roleid))->to_array());
+        $eiresponse->set_group((new responses\group($ei->{self::FIELD_GROUP}, 'group', $ei->courseid))->to_array());
 
-            // Add the E.I. to the response.
-            $extradata[] = $eiresponse->to_array();
+        // Add the E.I. to the response.
+        $extradata[] = $eiresponse->to_array();
 
-            // Actuals delete the enrolment instance.
-            $cohortenrolment->delete_instance($ei);
+        // Actuals delete the enrolment instance.
+        $cohortenrolment->delete_instance($ei);
 
-            // The following is a message of success.
-            $message = tools::get_string('deleteinstance:200');
-        } else if ($code == 400) {
-            $message = tools::get_string('deleteinstance:400');
-        } else {
-            $message = tools::get_string('unknownstatuscode');
-        }
+        // The following is a message of success.
+        $message = tools::get_string('deleteinstance:200');
+
 
         // Prepare the response and then send it.
         $response = [
             'id'        => $id,
             'code'      => $code,
             'message'   => $message,
-            'errors'    => $errors,
             'data'      => $extradata
         ];
 
@@ -882,6 +816,7 @@ class local_ws_enrolcohort_external extends external_api {
      * @throws coding_exception
      * @throws dml_exception
      * @throws invalid_parameter_exception
+     * @throws moodle_exception
      */
     public static function get_instances($params) {
         global $DB, $SITE;
@@ -889,8 +824,6 @@ class local_ws_enrolcohort_external extends external_api {
         // Check the parameters.
         $params = self::validate_parameters(self::get_instances_parameters(), [self::QUERYSTRING_COURSE => $params]);
 
-        // A place for the errors and extra data.
-        $errors = [];
         $extradata = [];
 
         // Get the courseid aka id.
@@ -898,91 +831,80 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the courseid.
         if ($courseid == $SITE->id) {
-            $errors[] = (new responses\error(-1, 'course', 'getinstances:courseissite'))->to_array();
+            throw new course_is_site_exception();
         } else if (!$DB->record_exists('course', ['id' => $courseid]) && $courseid != -1) {
-            $errors[] = (new responses\error($courseid, 'course', 'coursenotexists'))->to_array();
+            throw new course_not_found_exception($courseid);
         }
 
-        // Set the HTTP status code.
-        $code = empty($errors) ? 200 : 400;
-
-        // Get the response message based on the HTTP status code and get things if 200.
-        if ($code == 200) {
-            // Get the courses.
-            if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
-                $courses = $DB->get_records('course');
-            } else {
-                $courses = $DB->get_records('course', ['id' => $courseid]);
-            }
-
-            $foundsitecourse = false;
-            $numberofenrolmentmethods = 0;
-
-            foreach ($courses as $course) {
-                // Skip the site course.
-                if ($course->id == $SITE->id) {
-                    $foundsitecourse = true;
-                    continue;
-                }
-
-                // Skip courses that don't have cohort enrolment methods.
-                if (!$DB->record_exists('enrol', ['enrol' => 'cohort', 'courseid' => $course->id])) {
-                    continue;
-                }
-
-                // Get the cohort enrolment instances for this course.
-                $enrolmentinstances = $DB->get_records('enrol', ['enrol' => 'cohort', 'courseid' => $course->id]);
-
-                foreach ($enrolmentinstances as $enrolmentinstance) {
-                    // Make some info about the enrolment instance.
-                    $ei = new responses\enrol(
-                        $enrolmentinstance->id,
-                        'enrol',
-                        $enrolmentinstance->name,
-                        $enrolmentinstance->status,
-                        $enrolmentinstance->roleid,
-                        $enrolmentinstance->courseid,
-                        $enrolmentinstance->{self::FIELD_COHORT},
-                        $enrolmentinstance->{self::FIELD_GROUP}
-                    );
-
-                    // Get other details about the enrolment instance.
-                    $ei->set_course((new responses\course($enrolmentinstance->courseid))->to_array());
-                    $ei->set_cohort((new responses\cohort($enrolmentinstance->{self::FIELD_COHORT}))->to_array());
-                    $ei->set_role((new responses\role($enrolmentinstance->roleid))->to_array());
-                    $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}, 'group', $enrolmentinstance->courseid))->to_array());
-
-                    $extradata[] = $ei->to_array();
-
-                    $numberofenrolmentmethods += 1;
-                }
-            }
-
-            // Count things and make langstring placeholders.
-            $numberofcourses = count($courses);
-            if ($foundsitecourse) {
-                $numberofcourses -= 1;
-            }
-
-            $a = (object)['courseid' => $courseid, 'numberofenrolmentinstances' => $numberofenrolmentmethods, 'numberofcourses' => $numberofcourses];
-
-            if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
-                $message = tools::get_string('getinstances:200', $a);
-            } else {
-                $message = tools::get_string('getinstance:200', $a);
-            }
-        } else if ($code == 400) {
-            $message = tools::get_string('getinstances:400');
+        // Get the courses.
+        if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
+            $courses = $DB->get_records('course');
         } else {
-            $message = tools::get_string('unknownstatuscode', $code);
+            $courses = $DB->get_records('course', ['id' => $courseid]);
+        }
+
+        $foundsitecourse = false;
+        $numberofenrolmentmethods = 0;
+
+        foreach ($courses as $course) {
+            // Skip the site course.
+            if ($course->id == $SITE->id) {
+                $foundsitecourse = true;
+                continue;
+            }
+
+            // Skip courses that don't have cohort enrolment methods.
+            if (!$DB->record_exists('enrol', ['enrol' => 'cohort', 'courseid' => $course->id])) {
+                continue;
+            }
+
+            // Get the cohort enrolment instances for this course.
+            $enrolmentinstances = $DB->get_records('enrol', ['enrol' => 'cohort', 'courseid' => $course->id]);
+
+            foreach ($enrolmentinstances as $enrolmentinstance) {
+                // Make some info about the enrolment instance.
+                $ei = new responses\enrol(
+                    $enrolmentinstance->id,
+                    'enrol',
+                    $enrolmentinstance->name,
+                    $enrolmentinstance->status,
+                    $enrolmentinstance->roleid,
+                    $enrolmentinstance->courseid,
+                    $enrolmentinstance->{self::FIELD_COHORT},
+                    $enrolmentinstance->{self::FIELD_GROUP}
+                );
+
+                // Get other details about the enrolment instance.
+                $ei->set_course((new responses\course($enrolmentinstance->courseid))->to_array());
+                $ei->set_cohort((new responses\cohort($enrolmentinstance->{self::FIELD_COHORT}))->to_array());
+                $ei->set_role((new responses\role($enrolmentinstance->roleid))->to_array());
+                $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}, 'group', $enrolmentinstance->courseid))->to_array());
+
+                $extradata[] = $ei->to_array();
+
+                $numberofenrolmentmethods += 1;
+            }
+        }
+
+        // Count things and make langstring placeholders.
+        $numberofcourses = count($courses);
+        if ($foundsitecourse) {
+            $numberofcourses -= 1;
+        }
+
+        $a = (object)['courseid' => $courseid, 'numberofenrolmentinstances' => $numberofenrolmentmethods, 'numberofcourses' => $numberofcourses];
+
+        if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
+            $message = tools::get_string('getinstances:200', $a);
+        } else {
+            $message = tools::get_string('getinstance:200', $a);
         }
 
         // Prepare the response.
         $response = [
             'id'        => $courseid,
-            'code'      => $code,
+            'code'      => 200,
             'message'   => $message,
-            'errors'    => $errors,
             'data'      => $extradata
         ];
 

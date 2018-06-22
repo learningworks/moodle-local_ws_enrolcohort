@@ -59,11 +59,10 @@ $string['instancegroupnone']    = 'Enrol instance group none.';
 $string['instancenotexists']    = 'Unknown enrolment instance.';
 
 // Strings for webservice function add_instance.
-$string['addinstance:201']                  = 'Cohort enrolment instance added.';
-$string['addinstance:400']                  = 'Could not add cohort enrolment instance.';
-$string['addinstance:cohortalreadysynced']  = 'Cohort is already synchronised with selected role.';
-$string['addinstance:usingdefaultname']     = 'Using system generated name.';
-$string['addinstance:courseissite']         = 'Can not add instance to the site course.';
+$string['addinstance:201']              = 'Cohort enrolment instance added.';
+$string['addinstance:400']              = 'Could not add cohort enrolment instance.';
+$string['addinstance:usingdefaultname'] = 'Using system generated name.';
+$string['addinstance:courseissite']     = 'Can not add instance to the site course.';
 
 // Strings for webservice function update_instance.
 $string['updateinstance:200'] = 'Cohort enrolment instance updated.';
@@ -82,3 +81,16 @@ $string['getinstances:courseissite']    = 'Can not get instances for the site co
 
 // String for an unknown HTTP status code.
 $string['unknownstatuscode'] = 'Unknown status code {$a}.';
+
+// Strings for exceptions.
+$string['objectnotfound']               = 'Object does not exist!';
+$string['objectnotfound:message']       = 'Could not find {$a->object} with {$a->key} {$a->value}';
+$string['invalidcourse']                = 'Course is invalid!';
+$string['invalidcourse:issite']         = 'Can not add instance to the site course.';
+$string['unavailableatcontext']         = 'Object is not available at this context!';
+$string['unavailableatcontext:message'] = '{$a->object} with id {$a->id} is not {$a->word} at this context.';
+$string['invalidstatus']                = 'Invalid enrolment instance status!';
+$string['invalidstatus:message']        = 'Possible values for enrolment instance status are: {$a->enabled} - Enabled, {$a->disabled} - Disabled. Got {$a->actual}.';
+$string['cohortenrolmethodnotavailable']    = 'The cohort enrolment method is not available.';
+$string['enrolcohortalreadysyncedwithrole']         = 'A cohort enrol instance for this role already exists';
+$string['enrolcohortalreadysyncedwithrole:message'] = 'A cohort enrol instance with id {$a->enrolid} is already synchronised with the role {$a->roleid}';

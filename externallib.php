@@ -738,7 +738,7 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Validate the enrolment instance id.
         if (!$DB->record_exists('enrol', ['id' => $id, 'enrol' => 'cohort'])) {
-            throw new cohort_enrol_instance_not_found_exception('enrol', 'id', $id);
+            throw new cohort_enrol_instance_not_found_exception($id);
         }
 
         // This is the important one. Check if the cohort enrolment instance is available for use.

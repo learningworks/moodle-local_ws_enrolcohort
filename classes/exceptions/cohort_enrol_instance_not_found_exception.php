@@ -28,11 +28,8 @@ namespace local_ws_enrolcohort\exceptions;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-use \local_ws_enrolcohort\tools;
-
 class cohort_enrol_instance_not_found_exception extends object_not_found_exception {
-    public function __construct($object = '', $key = '', $value = '') {
-        $a = ['object' => $object, 'key' => $key, 'value' => $value];
-        parent::__construct('objectnotfound', tools::COMPONENT_NAME, '', null, tools::get_string('objectnotfound:message', $a));
+    public function __construct($enrolinstanceid = null) {
+        parent::__construct('enrol instance', 'id', $enrolinstanceid);
     }
 }

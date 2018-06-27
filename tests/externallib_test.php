@@ -520,7 +520,8 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertEquals(tools::get_string('updateinstance:200'), $response['message']);
 
         // Check groupid.
-        $this->assertEquals($DB->get_field('enrol', local_ws_enrolcohort_external::FIELD_GROUP, ['id' => $enrolmentinstanceid]), $newgroup->id);
+        $currentgroupid = $DB->get_field('enrol', local_ws_enrolcohort_external::FIELD_GROUP, ['id' => $enrolmentinstanceid]);
+        $this->assertEquals($currentgroupid, $newgroup->id);
 
         // Change the name.
         $newname = 'This is a brand new name';
@@ -821,7 +822,8 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
-            $this->assertInstanceOf('local_ws_enrolcohort\exceptions\cohort_enrol_instance_already_synced_with_role_exception', $exception);
+            $expectedexceptionclass = 'local_ws_enrolcohort\exceptions\cohort_enrol_instance_already_synced_with_role_exception';
+            $this->assertInstanceOf($expectedexceptionclass, $exception);
             $this->assertEquals('enrolcohortalreadysyncedwithrole', $exception->errorcode);
         }
 

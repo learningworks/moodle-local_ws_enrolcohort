@@ -47,7 +47,7 @@ use \local_ws_enrolcohort\exceptions\cohort_enrol_instance_not_found_exception;
 class local_ws_enrolcohort_external extends external_api {
 
     /**
-     * Constants that define the query strings i.e. https://example.url?querystring[key]=value&querystring[key]=value etcera, etcetera.
+     * Constants that define the query strings i.e. https://example.url?querystring[key]=value&querystring[key]=value etcetera.
      */
     const QUERYSTRING_INSTANCE  = 'instance';
     const QUERYSTRING_COURSE    = 'course';
@@ -232,14 +232,38 @@ class local_ws_enrolcohort_external extends external_api {
      * @return external_function_parameters
      */
     public static function add_instance_parameters() {
+        $courseidexternalvalue  = new external_value(
+            PARAM_INT, 'The id of the course.', VALUE_REQUIRED
+        );
+
+        $cohortidexternalvalue  = new external_value(
+            PARAM_INT, 'The id of the cohort.', VALUE_REQUIRED
+        );
+
+        $roleidexternalvalue    = new external_value(
+            PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED
+        );
+
+        $groupidexternalvalue   = new external_value(
+            PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, self::COHORT_GROUP_CREATE_NONE
+        );
+
+        $nameexternalvalue      = new external_value(
+            PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL, ''
+        );
+
+        $statusexternalvalue    = new external_value(
+            PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED
+        );
+
         return new external_function_parameters([
             self::QUERYSTRING_INSTANCE => new external_single_structure([
-                'courseid'  => new external_value(PARAM_INT, 'The id of the course.', VALUE_REQUIRED),
-                'cohortid'  => new external_value(PARAM_INT, 'The id of the cohort.', VALUE_REQUIRED),
-                'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_REQUIRED),
-                'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL, self::COHORT_GROUP_CREATE_NONE),
-                'name'      => new external_value(PARAM_TEXT, 'The name of the cohort enrolment instance.', VALUE_OPTIONAL, ''),
-                'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL, ENROL_INSTANCE_ENABLED)
+                'courseid'  => $courseidexternalvalue,
+                'cohortid'  => $cohortidexternalvalue,
+                'roleid'    => $roleidexternalvalue,
+                'groupid'   => $groupidexternalvalue,
+                'name'      => $nameexternalvalue,
+                'status'    => $statusexternalvalue
             ])
         ]);
     }
@@ -333,7 +357,8 @@ class local_ws_enrolcohort_external extends external_api {
         // Validate the group. This is optional.
         if (!is_null($groupid)) {
             $groupcreatemodes = [self::COHORT_GROUP_CREATE_NONE, self::COHORT_GROUP_CREATE_NEW];
-            if (!in_array($groupid, $groupcreatemodes) && !$DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid])) {
+            $coursegroupexists = $DB->record_exists('groups', ['courseid' => $courseid, 'id' => $groupid]);
+            if (!in_array($groupid, $groupcreatemodes) && !$coursegroupexists) {
                 // Provided group id doesn't exist for this course.
                 throw new group_not_found_exception($groupid);
             }
@@ -351,8 +376,15 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Check the users capabilities to ensure that they can do this.
         if ($context instanceof \context_course) {
-            // Check that the user has the required capabilities for the course context.
-            $requiredcapabilities = ['moodle/course:enrolconfig', 'enrol/cohort:config', 'moodle/cohort:view', 'moodle/course:managegroups', 'moodle/role:assign'];
+            // Check that the user has the required capabilities for the course context. This may not be needed.
+            $requiredcapabilities = [
+                'moodle/course:enrolconfig',
+                'enrol/cohort:config',
+                'moodle/cohort:view',
+                'moodle/course:managegroups',
+                'moodle/role:assign'
+            ];
+
             foreach ($requiredcapabilities as $requiredcapability) {
                 if (!has_capability($requiredcapability, $context)) {
                     throw new required_capability_exception($context, $requiredcapability, 'nopermissions', '');
@@ -437,7 +469,8 @@ class local_ws_enrolcohort_external extends external_api {
         // Get the enrolment instance.
         $realenrolinstance = $DB->get_record('enrol', ['id' => $response['id']]);
         if (empty($realenrolinstance->name)) {
-            $enrolinstancename = $cohortenrolment->get_instance_name($realenrolinstance).' - '.tools::get_string('addinstance:usingdefaultname');
+            $enrolinstancename =
+                $cohortenrolment->get_instance_name($realenrolinstance).' - '.tools::get_string('addinstance:usingdefaultname');
         } else {
             $enrolinstancename = $realenrolinstance->name;
         }
@@ -448,7 +481,7 @@ class local_ws_enrolcohort_external extends external_api {
 
         // Add data about the enrolment instance to the response.
         $extradata[] = (new responses\enrol(
-            $response['id'],'enrol', $enrolinstancename, $status, $roleid, $courseid, $cohortid, $realgroupid
+            $response['id'], 'enrol', $enrolinstancename, $status, $roleid, $courseid, $cohortid, $realgroupid
         ))->to_array();
 
         // Add the additional extra data to the response.
@@ -481,11 +514,11 @@ class local_ws_enrolcohort_external extends external_api {
     public static function update_instance_parameters() {
         return new external_function_parameters([
             self::QUERYSTRING_INSTANCE => new external_single_structure([
-                'id'        => new external_value(PARAM_INT, 'The id of the enrolment instance.', VALUE_REQUIRED),
-                'name'      => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL, ''),
-                'status'    => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL),
-                'roleid'    => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL),
-                'groupid'   => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL)
+                'id'      => new external_value(PARAM_INT, 'The id of the enrolment instance.', VALUE_REQUIRED),
+                'name'    => new external_value(PARAM_TEXT, 'The name you want to give the enrolment instance.', VALUE_OPTIONAL),
+                'status'  => new external_value(PARAM_INT, 'The status of the enrolment method.', VALUE_OPTIONAL),
+                'roleid'  => new external_value(PARAM_INT, 'The id of an existing role to assign users.', VALUE_OPTIONAL),
+                'groupid' => new external_value(PARAM_INT, 'The id of a group to add users to.', VALUE_OPTIONAL)
             ])
         ]);
     }
@@ -753,7 +786,9 @@ class local_ws_enrolcohort_external extends external_api {
         $ei = $DB->get_record('enrol', ['id' => $id, 'enrol' => 'cohort']);
 
         // Make a E.I. response.
-        $eiresponse = new responses\enrol($id, 'enrol', $ei->name, $ei->status, $ei->roleid, $ei->courseid, $ei->{self::FIELD_COHORT}, $ei->{self::FIELD_GROUP});
+        $eiresponse = new responses\enrol(
+            $id, 'enrol', $ei->name, $ei->status, $ei->roleid, $ei->courseid, $ei->{self::FIELD_COHORT}, $ei->{self::FIELD_GROUP}
+        );
 
         // Get other details about the deleted enrolment instance.
         $eiresponse->set_course((new responses\course($ei->courseid))->to_array());
@@ -769,7 +804,6 @@ class local_ws_enrolcohort_external extends external_api {
 
         // The following is a message of success.
         $message = tools::get_string('deleteinstance:200');
-
 
         // Prepare the response and then send it.
         $response = [
@@ -878,7 +912,13 @@ class local_ws_enrolcohort_external extends external_api {
                 $ei->set_course((new responses\course($enrolmentinstance->courseid))->to_array());
                 $ei->set_cohort((new responses\cohort($enrolmentinstance->{self::FIELD_COHORT}))->to_array());
                 $ei->set_role((new responses\role($enrolmentinstance->roleid))->to_array());
-                $ei->set_group((new responses\group($enrolmentinstance->{self::FIELD_GROUP}, 'group', $enrolmentinstance->courseid))->to_array());
+
+                // Made an object for this so it doesn't exceed 132 characters.
+                $groupresponse = new responses\group(
+                    $enrolmentinstance->{self::FIELD_GROUP}, 'group', $enrolmentinstance->courseid
+                );
+
+                $ei->set_group($groupresponse->to_array());
 
                 $extradata[] = $ei->to_array();
 
@@ -892,7 +932,11 @@ class local_ws_enrolcohort_external extends external_api {
             $numberofcourses -= 1;
         }
 
-        $a = (object)['courseid' => $courseid, 'numberofenrolmentinstances' => $numberofenrolmentmethods, 'numberofcourses' => $numberofcourses];
+        $a = [
+            'courseid'                      => $courseid,
+            'numberofenrolmentinstances'    => $numberofenrolmentmethods,
+            'numberofcourses'               => $numberofcourses
+        ];
 
         if ($courseid == self::GET_INSTANCES_COURSEID_ALL) {
             $message = tools::get_string('getinstances:200', $a);

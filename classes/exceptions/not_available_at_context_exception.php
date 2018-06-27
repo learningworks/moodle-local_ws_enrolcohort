@@ -32,7 +32,11 @@ use local_ws_enrolcohort\tools;
 
 class not_available_at_context_exception extends \moodle_exception {
     public function __construct($object = '', $id = '', $word = '') {
-        $a = ['object' => $object, 'id' => $id, 'word' => $word];
-        parent::__construct('unavailableatcontext', tools::COMPONENT_NAME, '', null, tools::get_string('unavailableatcontext:message', $a));
+        // Prepare some strings and things.
+        $errorcode  = 'unavailableatcontext';
+        $a          = ['object' => $object, 'id' => $id, 'word' => $word];
+        $debuginfo  = tools::get_string('unavailableatcontext:message', $a);
+
+        parent::__construct($errorcode, tools::COMPONENT_NAME, '', null, $debuginfo);
     }
 }

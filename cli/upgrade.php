@@ -64,11 +64,9 @@ list($options, $unrecognized) = cli_get_params(
 );
 
 if (function_exists('cli_logo') && $options['print-logo']) {
-    // Show a logo.
+    // Show a logo because we can..
     cli_logo();
     echo PHP_EOL;
-} else {
-    // Most likely totara.
 }
 
 if ($unrecognized) {
@@ -107,7 +105,7 @@ if (!$options['no-debugging']) {
 
 // Start output log.
 $trace = new \text_progress_trace();
-$trace->output(get_string('pluginname', 'local_ws_enrolcohort') . ' - This is a CLI script that will update this webservice things.');
+$trace->output(get_string('pluginname', 'local_ws_enrolcohort').' - This is a CLI script that will update webservice things.');
 
 // Say some stuff like debugging is whatever.
 if (!$options['no-debugging']) {
@@ -124,17 +122,10 @@ if ($options['no-verbose']) {
     $trace->output("Verbose output is enabled.\n");
 }
 
-// Start timing.
-if (class_exists('\local_ws_enrolcohort\timer')) {
-    // Todo: Name the timer something by adding a string to the constructor.
-    $timer = new \local_ws_enrolcohort\timer();
-    $timer->start();
-} else {
-    // Non classy style of timing.
-    $timenow = time();
-    $trace->output("Server Time: " . date('r', $timenow) . "\n");
-    $starttime = microtime();
-}
+// Non classy style of timing.
+$timenow = time();
+$trace->output("Server Time: " . date('r', $timenow) . "\n");
+$starttime = microtime();
 
 $trace->output('Updating the webservices without doing the moodle updateyness.');
 external_update_descriptions('local_ws_enrolcohort');
@@ -143,11 +134,5 @@ upgrade_noncore(true);
 $trace->output('The webservice functions stuff should be updated.'.PHP_EOL);
 
 // Finish timing.
-if (class_exists('\local_ws_enrolcohort\timer')) {
-    // End the timer and show execution time.
-    $timer->stop();
-    $timer->show_execution_time();
-} else {
-    $difftime = microtime_diff($starttime, microtime());
-    $trace->output("Script execution took {$difftime} seconds\n");
-}
+$difftime = microtime_diff($starttime, microtime());
+$trace->output("Script execution took {$difftime} seconds\n");

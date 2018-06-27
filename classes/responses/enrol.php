@@ -79,7 +79,8 @@ class enrol extends response {
      */
     protected $group;
 
-    public function __construct($id = 0, $object = 'enrol', $name = '', $status = 0, $roleid = 0, $courseid = 0, $cohortid = 0, $groupid = 0) {
+    public function __construct($id = 0, $object = 'enrol', $name = '', $status = 0,
+                                $roleid = 0, $courseid = 0, $cohortid = 0, $groupid = 0) {
         parent::__construct($id, $object);
 
         // Set the values for the fields.

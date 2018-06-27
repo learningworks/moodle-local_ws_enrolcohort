@@ -26,6 +26,19 @@
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
+// The individual capabilities.
+$cohortview         = 'moodle/cohort:view';
+$roleassign         = 'moodle/role:assign';
+$coursemanagegroups = 'moodle/course:managegroups';
+$courseenrolconfig  = 'moodle/course:enrolconfig';
+$enrolcohortconfig  = 'enrol/cohort:config';
+
+// Put the capabilities together for each webservice function.
+$addcapabilities    = "{$cohortview}, {$roleassign}, {$coursemanagegroups}, {$courseenrolconfig}, {$enrolcohortconfig}";
+$updatecapabilities = "{$roleassign}, {$coursemanagegroups}, {$courseenrolconfig}, {$enrolcohortconfig}";
+$deletecapabilities = "{$cohortview}, {$coursemanagegroups}, {$courseenrolconfig}, {$enrolcohortconfig}";
+$getcapabilities    = "{$cohortview}, {$courseenrolconfig}, {$enrolcohortconfig}";
+
 // We defined the web service functions to install.
 $functions = [
     'local_ws_enrolcohort_add_instance' => [
@@ -33,7 +46,7 @@ $functions = [
         'methodname'    => 'add_instance',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Adds a new cohort sync enrolment instance to the specified course.',
-        'capabilities'  => 'moodle/cohort:view, moodle/role:assign, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => $addcapabilities,
         'type'          => 'create'
     ],
     'local_ws_enrolcohort_update_instance' => [
@@ -41,7 +54,7 @@ $functions = [
         'methodname'    => 'update_instance',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Updates an existing cohort enrolment instance.',
-        'capabilities'  => 'moodle/role:assign, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => $updatecapabilities,
         'type'          => 'update'
     ],
     'local_ws_enrolcohort_delete_instance' => [
@@ -49,7 +62,7 @@ $functions = [
         'methodname'    => 'delete_instance',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Deletes an existing cohort enrolment instance.',
-        'capabilities'  => 'moodle/cohort:view, moodle/course:managegroups, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => $deletecapabilities,
         'type'          => 'delete'
     ],
     'local_ws_enrolcohort_get_instances' => [
@@ -57,7 +70,7 @@ $functions = [
         'methodname'    => 'get_instances',
         'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Gets a list of cohort enrolment instances.',
-        'capabilities'  => 'moodle/cohort:view, moodle/course:enrolconfig, enrol/cohort:config',
+        'capabilities'  => $getcapabilities,
         'type'          => 'get'
     ]
 ];

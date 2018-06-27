@@ -32,7 +32,11 @@ use \local_ws_enrolcohort\tools;
 
 class cohort_enrol_instance_already_synced_with_role_exception extends \moodle_exception {
     public function __construct($enrolinstanceid, $roleid) {
-        $a = ['enrolid' => $enrolinstanceid, 'roleid' => $roleid];
-        parent::__construct('enrolcohortalreadysyncedwithrole', tools::COMPONENT_NAME, '', null, tools::get_string('enrolcohortalreadysyncedwithrole:message', $a));
+        // Prepare some strings and things.
+        $errorcode  = 'enrolcohortalreadysyncedwithrole';
+        $a          = ['enrolid' => $enrolinstanceid, 'roleid' => $roleid];
+        $debuginfo  = tools::get_string('enrolcohortalreadysyncedwithrole:message', $a);
+
+        parent::__construct($errorcode, tools::COMPONENT_NAME, '', null, $debuginfo);
     }
 }

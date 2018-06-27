@@ -1,1 +1,1 @@
-# moodle-local_ws_enrolcohortd
+# moodle-local_ws_enrolcohort

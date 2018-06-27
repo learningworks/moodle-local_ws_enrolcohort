@@ -47,20 +47,20 @@ raise_memory_limit(MEMORY_HUGE);
 
 // CLI options.
 list($options, $unrecognized) = cli_get_params(
-// Long names.
-        [
-                'help' => false,
-                'no-verbose' => false,
-                'no-debugging' => false,
-                'print-logo' => false
-        ],
-        // Short names.
-        [
-                'h' => 'help',
-                'nv' => 'no-verbose',
-                'nd' => 'no-debugging',
-                'pl' => 'print-logo'
-        ]
+    // Long names.
+    [
+        'help' => false,
+        'no-verbose' => false,
+        'no-debugging' => false,
+        'print-logo' => false
+    ],
+    // Short names.
+    [
+        'h' => 'help',
+        'nv' => 'no-verbose',
+        'nd' => 'no-debugging',
+        'pl' => 'print-logo'
+    ]
 );
 
 if (function_exists('cli_logo') && $options['print-logo']) {
@@ -77,7 +77,7 @@ if ($unrecognized) {
 // Show help.
 if ($options['help']) {
     $help =
-            "{Some title}
+            "Local WS Enrol cohort CLI script to update things without updating things.
 
 Please note you must execute this script with the same uid as apache!
 

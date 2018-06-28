@@ -8,7 +8,7 @@
 * [How do I install this plugin?](#how-do-i-install-this-plugin?)
 * [What version of Moodle can I install this on?](#what-version-of-moodle-can-i-install-this-on?)
 * [How do I use this plugin?](#how-do-i-use-this-plugin?)
-* [Examples](#examples)
+* [Examples JSON responses](#example-json-responses)
 
 What is this plugin?
 --------------------
@@ -18,7 +18,7 @@ This is a local plugin with webservice functions.
 What can this plugin do?
 -------------------------
 
-This plugin enables people to add a cohort enrolment instance to a course using webservices.
+This local plugin enables people to add a cohort enrolment instance to a course using webservices.
 
 What else can this plugin do?
 ------------------------------
@@ -38,13 +38,14 @@ In addition to adding a cohort enrolment instance to a course using webservices,
 What can this plugin not do?
 ----------------------------
 
-This plugin can not do anything that is not listed under [What else can this plugin do?](#what-else-can-this-plugin-do?)
+This plugin can not do anything that is not listed under [What can this plugin do?](#what-can-this-plugin-do?)
+or [What else can this plugin do?](#what-else-can-this-plugin-do?)
 
 How do I install this plugin?
 -----------------------------
 
 This plugin can be installed by following the official 
-<a href="http://docs.moodle.org/en/Installing_plugins">Moodle documentation</a>. 
+<a href="http://docs.moodle.org/en/Installing_plugins" target="_blank">Moodle documentation</a>. 
 
 
 What version of Moodle can I install this on?
@@ -56,12 +57,12 @@ How do I use this plugin?
 -------------------------
 
 This plugin can be used in accordance with the official 
-<a href="https://docs.moodle.org/en/Using_web_services">Moodle documentation</a>.
+<a href="https://docs.moodle.org/en/Using_web_services" target="_blank">Moodle documentation</a>.
 
-Examples
---------
+Example JSON responses.
+-----------------------
 
-This is an example of a response to the webservice function get_instances().
+This is an example of a JSON response to the webservice function get_instances().
 
 `{
      "id": -1,
@@ -70,7 +71,7 @@ This is an example of a response to the webservice function get_instances().
      "data": []
  }`
  
-Here are some example responses to the webservice function add_instance().
+Here are some example JSON responses to the webservice function add_instance().
  
 
  `{

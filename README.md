@@ -1,7 +1,6 @@
 # Moodle Webservices for Cohort Enrolment.
 
-
-* [What is this plugin?](#what-is-this-plugin?)
+* [What is this plugin and why was it developed?](#what-is-this-plugin-and-why-was-it-developed?)
 * [What can this plugin do?](#what-can-this-plugin-do?)
 * [What else can this plugin do?](#what-else-can-this-plugin-do?)
 * [What can this plugin not do?](#what-can-this-plugin-not-do?)
@@ -10,10 +9,17 @@
 * [How do I use this plugin?](#how-do-i-use-this-plugin?)
 * [Examples JSON responses](#example-json-responses)
 
-What is this plugin?
---------------------
+What is this plugin and why was it developed?
+---------------------------------------------
 
 This is a local plugin with webservice functions.
+
+It was developed for <a href="https://www.twoa.ac.nz" target="_blank" alt="Link to Te Wānanga O Aotearoa website" title="Link to Te Wānanga O Aotearoa website">Te Wānanga O Aotearoa</a>
+to streamline the enrolment of tauira (student, learner) into courses. Cohorts and courses are created using Moodle webservices but 
+adding cohort enrolment instances to courses was a manual process. 
+
+The overall goal is to have this webservice function integrated into Moodle core.
+
 
 What can this plugin do?
 -------------------------
@@ -73,7 +79,6 @@ This is an example of a JSON response to the webservice function get_instances()
  
 Here are some example JSON responses to the webservice function add_instance().
  
-
  `{
       "exception": "local_ws_enrolcohort\\exceptions\\cohort_not_found_exception",
       "errorcode": "objectnotfound",

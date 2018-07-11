@@ -567,7 +567,7 @@ class local_ws_enrolcohort_external extends external_api {
         $enrolmentinstance = null;
 
         if (!$DB->record_exists_select('enrol', $sqlwhere, $sqlparams)) {
-            throw new cohort_enrol_instance_not_found_exception('cohort', 'id', $id);
+            throw new cohort_enrol_instance_not_found_exception($id);
         } else {
             $enrolmentinstance = $DB->get_record_select('enrol', $sqlwhere, $sqlparams);
             $context = \context_course::instance($enrolmentinstance->courseid);

@@ -31,7 +31,7 @@ $plugin->requires = 2017051500;
 
 // Plugin details.
 $plugin->component  = 'local_ws_enrolcohort';
-$plugin->version    = 2018041900;  // Plugin released on 19 Apr 2018.
+$plugin->version    = 2018041901;  // Plugin released on 19 Apr 2018.
 $plugin->release    = 'v3.3-r1';   // This is our first revision for Moodle 3.3.
 
 // Plugin status details.

@@ -30,6 +30,6 @@ defined('MOODLE_INTERNAL') || die();
 
 class cohort_enrol_instance_not_found_exception extends object_not_found_exception {
     public function __construct($enrolinstanceid = null) {
-        parent::__construct('enrol instance', 'id', $enrolinstanceid);
+        parent::__construct('cohort enrol instance', 'id', $enrolinstanceid);
     }
 }

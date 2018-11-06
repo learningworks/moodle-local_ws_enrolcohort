@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version file for local_ws_enrolcohort.
+ * Privacy API provider for local_ws_enrolcohort.
  *
  * @package     local_ws_enrolcohort
  * @author      Donald Barrett <donald.barrett@learningworks.co.nz>
@@ -23,16 +23,22 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace local_ws_enrolcohort\privacy;
+
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-// This plugin requires Moodle 3.3.
-$plugin->requires = 2017051500;
+use core_privacy\local\metadata\null_provider;
 
-// Plugin details.
-$plugin->component  = 'local_ws_enrolcohort';
-$plugin->version    = 2018110600;   // Plugin updated November 6, 2018.
-$plugin->release    = 'v3.3.2';
+class provider implements null_provider {
 
-// Plugin status details.
-$plugin->maturity = MATURITY_STABLE;   // ALPHA, BETA, RC, STABLE.
+    /**
+     * Get the language string identifier with the component's language
+     * file to explain why this plugin stores no data.
+     *
+     * @return string
+     */
+    public static function get_reason() {
+        return 'privacy:metadata';
+    }
+}

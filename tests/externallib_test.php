@@ -166,6 +166,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
             $this->fail('An unexpected exception was caught ('.get_class($exception).').');
         }
 
+        $enrolmentinstances = enrol_get_instances($course->id, false);
+        $this->assertArrayNotHasKey($enrolmentinstanceid, $enrolmentinstances);
+
         $this->assertArrayHasKey('id', $wsdeleteinstanceresponse);
         $this->assertEquals($enrolmentinstanceid, $wsdeleteinstanceresponse['id']);
 

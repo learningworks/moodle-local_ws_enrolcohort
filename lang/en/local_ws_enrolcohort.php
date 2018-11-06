@@ -94,3 +94,6 @@ $string['invalidstatus:message']        = 'Possible values for enrolment instanc
 $string['cohortenrolmethodnotavailable']    = 'The cohort enrolment method is not available.';
 $string['enrolcohortalreadysyncedwithrole']         = 'A cohort enrol instance for this role already exists';
 $string['enrolcohortalreadysyncedwithrole:message'] = 'A cohort enrol instance with id {$a->enrolid} is already synchronised with the role {$a->roleid}';
+
+// Strings for privacy API.
+$string['privacy:metadata'] = 'The local webservices cohort enrolment plugin does not store any personal data.';

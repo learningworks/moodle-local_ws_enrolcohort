@@ -326,7 +326,7 @@ class local_ws_enrolcohort_external extends external_api {
         $extradata[] = (new responses\cohort($cohortid))->to_array();
 
         // Get the available cohorts.
-        $availablecohorts = cohort_get_available_cohorts($context);
+        $availablecohorts = cohort_get_available_cohorts($context, 0, 0, 0);
         if (empty($availablecohorts) || !isset($availablecohorts[$cohortid])) {
             throw new cohort_not_available_at_context_exception($cohortid);
         }

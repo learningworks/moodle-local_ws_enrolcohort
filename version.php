@@ -31,8 +31,8 @@ $plugin->requires = 2017051500;
 
 // Plugin details.
 $plugin->component  = 'local_ws_enrolcohort';
-$plugin->version    = 2018110600;   // Plugin updated November 6, 2018.
-$plugin->release    = 'v3.3.2';
+$plugin->version    = 2019042900;   // Plugin updated April 29, 2019.
+$plugin->release    = 'v3.3.3';
 
 // Plugin status details.
 $plugin->maturity = MATURITY_STABLE;   // ALPHA, BETA, RC, STABLE.

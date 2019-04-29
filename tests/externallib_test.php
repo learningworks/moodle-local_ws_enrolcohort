@@ -34,6 +34,12 @@ require_once($CFG->dirroot.'/local/ws_enrolcohort/externallib.php');
 use \local_ws_enrolcohort\tools;
 
 class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_testcase {
+    public function create_cohorts($numberofcohorts = 100) {
+        for ($i = 0; $i < $numberofcohorts; $i++) {
+            self::getDataGenerator()->create_cohort();
+        }
+    }
+
     /// <editor-fold desc="Tests for get_instances() function calls.">
 
     public function test_get_instances() {
@@ -63,6 +69,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // The number of courses, and cohort enrolment instances to make.
         $numberofcoursestomake = 5;
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         // Storage for courseids.
         $courseids = [];
@@ -128,6 +137,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         // Add a cohort enrolment instance to a course.
         try {
@@ -215,6 +227,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
 
@@ -261,6 +276,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
 
@@ -305,6 +323,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -352,6 +373,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -401,6 +425,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -457,6 +484,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -592,6 +622,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid = $course->id;
         $cohortid = $cohort->id;
 
@@ -649,6 +682,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course     = self::getDataGenerator()->create_course();
         $cohort     = self::getDataGenerator()->create_cohort();
         $roleid     = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -711,6 +747,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
         $group  = self::getDataGenerator()->create_group(['courseid' => $course->id]);
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -781,6 +820,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $roleid = self::getDataGenerator()->create_role();
         $group  = self::getDataGenerator()->create_group(['courseid' => $differentcourse->id]);
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
         $groupid    = $group->id;
@@ -811,6 +853,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid = $course->id;
         $cohortid = $cohort->id;
@@ -854,6 +899,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         $courseid = $course->id;
         $cohortid = $cohort->id;
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         try {
             $response = local_ws_enrolcohort_external::add_instance([
@@ -989,6 +1037,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course();
         $cohort = self::getDataGenerator()->create_cohort();
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
         $roleid     = 0;
@@ -1018,6 +1069,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort();
         $roleid = self::getDataGenerator()->create_role();
         $role   = $DB->get_record('role', ['id' => $roleid]);
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
@@ -1083,6 +1137,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohort = self::getDataGenerator()->create_cohort(['contextid' => $coursecategory->get_context()->id]);
         $roleid = self::getDataGenerator()->create_role();
 
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
+
         $courseid = $course->id;
         $cohortid = $cohort->id;
 
@@ -1111,6 +1168,9 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $course = self::getDataGenerator()->create_course(['category' => $coursecategory->id]);
         $cohort = self::getDataGenerator()->create_cohort(['contextid' => $coursecategory->get_context()->id]);
         $roleid = self::getDataGenerator()->create_role(['archetype' => 'frontpage']);
+
+        // Ensure lots of cohorts exist to test the cohort_get_available_cohorts limit is working.
+        self::create_cohorts();
 
         $courseid = $course->id;
         $cohortid = $cohort->id;

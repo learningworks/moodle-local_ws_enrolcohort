@@ -22,10 +22,16 @@ jobs:
         include:
           - php: '7.3'
             moodle-branch: 'MOODLE_39_STABLE'
+            extensions: mbstring
           - php: '7.3'
             moodle-branch: 'MOODLE_310_STABLE'
+            extensions: mbstring
           - php: '7.4'
             moodle-branch: 'MOODLE_311_STABLE'
+            extensions: [sodium, mbstring]
+          - php: '7.4'
+            moodle-branch: 'MOODLE_400_STABLE'
+            extensions: [sodium, mbstring, exif]
 
     steps:
       - name: Check out repository code
@@ -37,6 +43,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          ini-values: max_input_vars=5000
           coverage: none
 
       - name: Initialise moodle-plugin-ci

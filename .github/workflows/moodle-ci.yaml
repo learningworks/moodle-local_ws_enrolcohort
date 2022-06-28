@@ -69,9 +69,6 @@ jobs:
       - name: Run phpmd
         run: moodle-plugin-ci phpmd
 
-      - name: Run codechecker
-        run: moodle-plugin-ci codechecker
-
       - name: Run validate
         run: moodle-plugin-ci validate
 

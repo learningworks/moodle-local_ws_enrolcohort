@@ -1,0 +1,119 @@
+#
+# Whenever version.php is changed, add to Moodle Plugins directory at https://moodle.org/plugins.
+# Thanks https://github.com/danmarsden :)
+#
+
+name: moodle-plugin-ci
+
+on:
+  push:
+    paths:
+      - 'version.php'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: 'postgres'
+          POSTGRES_HOST_AUTH_METHOD: 'trust'
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 3
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - php: '7.2'
+            moodle-branch: 'MOODLE_39_STABLE'
+            extensions: mbstring
+          - php: '7.2'
+            moodle-branch: 'MOODLE_310_STABLE'
+            extensions: mbstring
+          - php: '7.3'
+            moodle-branch: 'MOODLE_311_STABLE'
+            extensions: [sodium, mbstring]
+          - php: '7.3'
+            moodle-branch: 'MOODLE_400_STABLE'
+            extensions: [sodium, mbstring, exif]
+
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+        with:
+          path: plugin
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          ini-values: max_input_vars=5000
+          coverage: none
+
+      - name: Initialise moodle-plugin-ci
+        run: |
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci ^3
+          echo $(cd ci/bin; pwd) >> $GITHUB_PATH
+          echo $(cd ci/vendor/bin; pwd) >> $GITHUB_PATH
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=$HOME/.nvm" >> $GITHUB_ENV
+
+      - name: Install moodle-plugin-ci
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1
+        env:
+          DB: pgsql
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: Run phplint
+        run: moodle-plugin-ci phplint
+
+      - name: Run phpcpd
+        run: moodle-plugin-ci phpcpd || true
+
+      - name: Run phpmd
+        run: moodle-plugin-ci phpmd
+
+      - name: Run validate
+        run: moodle-plugin-ci validate
+
+      - name: Run savepoints
+        run: moodle-plugin-ci savepoints
+
+      - name: PHPUnit tests
+        if: ${{ always() }}
+        run: moodle-plugin-ci phpunit --coverage-text
+
+      - name: Release at Moodle.org by calling the service function
+        id: add-version
+        env:
+          PLUGIN: local_ws_enrolcohort
+          BRANCH: master
+          CURL: curl -s
+          ENDPOINT: https://moodle.org/webservice/rest/server.php
+          TOKEN: ${{ secrets.MOODLE_ORG_TOKEN }}
+          FUNCTION: local_plugins_add_version
+
+        run: |
+          ZIPURL="https://github.com/emyb/moodle-local_ws_enrolcohort/archive/refs/heads/${BRANCH}.zip"
+          RESPONSE=$(${CURL} ${ENDPOINT} --data-urlencode "wstoken=${TOKEN}" \
+                                         --data-urlencode "wsfunction=${FUNCTION}" \
+                                         --data-urlencode "moodlewsrestformat=json" \
+                                         --data-urlencode "frankenstyle=${PLUGIN}" \
+                                         --data-urlencode "zipurl=${ZIPURL}" \
+                                         --data-urlencode "vcssystem=git" \
+                                         --data-urlencode "vcsrepositoryurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" \
+                                         --data-urlencode "vcstag=${TAGNAME}" \
+                                         --data-urlencode "changelogurl=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/blob/${BRANCH}/CHANGELOG.md" \
+                                         --data-urlencode "altdownloadurl=${ZIPURL}")
+          echo "::set-output name=response::${RESPONSE}"
+      - name: Evaluate the response
+        id: evaluate-response
+        env:
+          RESPONSE: ${{ steps.add-version.outputs.response }}
+        run: |
+          jq <<< ${RESPONSE}
+          jq --exit-status ".id" <<< ${RESPONSE} > /dev/null

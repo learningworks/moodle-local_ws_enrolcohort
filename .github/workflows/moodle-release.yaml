@@ -3,7 +3,7 @@
 # Thanks https://github.com/danmarsden :)
 #
 
-name: moodle-plugin-ci
+name: Releasing in the Plugins directory
 
 on:
   push:

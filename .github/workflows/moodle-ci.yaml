@@ -75,9 +75,6 @@ jobs:
       - name: Run savepoints
         run: moodle-plugin-ci savepoints
 
-      - name: Run phpdoc
-        run: moodle-plugin-ci phpdoc
-
       - name: PHPUnit tests
         if: ${{ always() }}
         run: moodle-plugin-ci phpunit --coverage-text

@@ -20,16 +20,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - php: '7.3'
+          - php: '7.2'
             moodle-branch: 'MOODLE_39_STABLE'
             extensions: mbstring
-          - php: '7.3'
+          - php: '7.2'
             moodle-branch: 'MOODLE_310_STABLE'
             extensions: mbstring
-          - php: '7.4'
+          - php: '7.3'
             moodle-branch: 'MOODLE_311_STABLE'
             extensions: [sodium, mbstring]
-          - php: '7.4'
+          - php: '7.3'
             moodle-branch: 'MOODLE_400_STABLE'
             extensions: [sodium, mbstring, exif]
 

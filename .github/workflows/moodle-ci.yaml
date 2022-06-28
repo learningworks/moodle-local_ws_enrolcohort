@@ -78,12 +78,8 @@ jobs:
       - name: Run savepoints
         run: moodle-plugin-ci savepoints
 
-      - name: Grunt
-        if: ${{ always() }}
-        run: moodle-plugin-ci grunt --max-lint-warnings 0
-
       - name: Run phpdoc
-          run: moodle-plugin-ci phpdoc
+        run: moodle-plugin-ci phpdoc
 
       - name: PHPUnit tests
         if: ${{ always() }}

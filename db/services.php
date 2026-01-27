@@ -42,33 +42,29 @@ $getcapabilities    = "{$cohortview}, {$courseenrolconfig}, {$enrolcohortconfig}
 // We defined the web service functions to install.
 $functions = [
     'local_ws_enrolcohort_add_instance' => [
-        'classname'     => 'local_ws_enrolcohort_external',
+        'classname'     => 'local_ws_enrolcohort\external\enrolcohort',
         'methodname'    => 'add_instance',
-        'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Adds a new cohort sync enrolment instance to the specified course.',
         'capabilities'  => $addcapabilities,
         'type'          => 'create'
     ],
     'local_ws_enrolcohort_update_instance' => [
-        'classname'     => 'local_ws_enrolcohort_external',
+        'classname'     => 'local_ws_enrolcohort\external\enrolcohort',
         'methodname'    => 'update_instance',
-        'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Updates an existing cohort enrolment instance.',
         'capabilities'  => $updatecapabilities,
         'type'          => 'update'
     ],
     'local_ws_enrolcohort_delete_instance' => [
-        'classname'     => 'local_ws_enrolcohort_external',
+        'classname'     => 'local_ws_enrolcohort\external\enrolcohort',
         'methodname'    => 'delete_instance',
-        'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Deletes an existing cohort enrolment instance.',
         'capabilities'  => $deletecapabilities,
         'type'          => 'delete'
     ],
     'local_ws_enrolcohort_get_instances' => [
-        'classname'     => 'local_ws_enrolcohort_external',
+        'classname'     => 'local_ws_enrolcohort\external\enrolcohort',
         'methodname'    => 'get_instances',
-        'classpath'     => 'local/ws_enrolcohort/externallib.php',
         'description'   => 'Gets a list of cohort enrolment instances.',
         'capabilities'  => $getcapabilities,
         'type'          => 'get'

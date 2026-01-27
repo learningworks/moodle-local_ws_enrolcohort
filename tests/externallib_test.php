@@ -31,6 +31,7 @@ global $CFG;
 require_once($CFG->dirroot.'/webservice/tests/helpers.php');
 require_once($CFG->dirroot.'/local/ws_enrolcohort/externallib.php');
 
+use local_ws_enrolcohort\external\enrolcohort;
 use \local_ws_enrolcohort\tools;
 
 class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_testcase {
@@ -553,7 +554,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertEquals(tools::get_string('updateinstance:200'), $response['message']);
 
         // Check groupid.
-        $currentgroupid = $DB->get_field('enrol', local_ws_enrolcohort_external::FIELD_GROUP, ['id' => $enrolmentinstanceid]);
+        $currentgroupid = $DB->get_field('enrol', local_ws_enrolcohort\external\enrolcohort::FIELD_GROUP, ['id' => $enrolmentinstanceid]);
         $this->assertEquals($currentgroupid, $newgroup->id);
 
         // Change the name.
@@ -688,7 +689,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         $courseid   = $course->id;
         $cohortid   = $cohort->id;
-        $groupid    = local_ws_enrolcohort_external::COHORT_GROUP_CREATE_NEW;
+        $groupid    = enrolcohort::COHORT_GROUP_CREATE_NEW;
 
         try {
             $response = local_ws_enrolcohort_external::add_instance([

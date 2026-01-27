@@ -28,7 +28,7 @@ namespace local_ws_enrolcohort\responses;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-use \local_ws_enrolcohort\tools as tools;
+use local_ws_enrolcohort\tools;
 
 class error extends response {
     /**

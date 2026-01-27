@@ -28,7 +28,7 @@ namespace local_ws_enrolcohort\exceptions;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-use \local_ws_enrolcohort\tools;
+use local_ws_enrolcohort\tools;
 
 class cohort_enrol_instance_already_synced_with_role_exception extends \moodle_exception {
     public function __construct($enrolinstanceid, $roleid) {

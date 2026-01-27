@@ -28,7 +28,7 @@ namespace local_ws_enrolcohort\exceptions;
 // No direct access.
 defined('MOODLE_INTERNAL') || die();
 
-use \local_ws_enrolcohort\tools;
+use local_ws_enrolcohort\tools;
 
 class object_not_found_exception extends \moodle_exception {
     public function __construct($object = '', $key = '', $value = '') {

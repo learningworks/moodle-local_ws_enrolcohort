@@ -27,12 +27,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 // This plugin requires Moodle 3.3.
-$plugin->requires = 2017051500;
+$plugin->requires = 2024100700;
 
 // Plugin details.
 $plugin->component  = 'local_ws_enrolcohort';
-$plugin->version    = 2019042900;   // Plugin updated April 29, 2019.
-$plugin->release    = 'v3.3.3';
+$plugin->version    = 2026012700;
+$plugin->release    = 'v4.5.0';
 
 // Plugin status details.
 $plugin->maturity = MATURITY_STABLE;   // ALPHA, BETA, RC, STABLE.

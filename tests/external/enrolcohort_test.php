@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 namespace local_ws_enrolcohort\external;
 
 // No direct access.
@@ -23,7 +21,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 
-require_once($CFG->dirroot.'/webservice/tests/helpers.php');
+require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 require_once($CFG->dirroot . '/local/ws_enrolcohort/classes/external/enrolcohort.php');
 
 use externallib_advanced_testcase;
@@ -38,7 +36,7 @@ use moodle_exception;
  * @copyright   2018 onwards, LearningWorks ltd
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class enrolcohort_test extends externallib_advanced_testcase {
+final class enrolcohort_test extends externallib_advanced_testcase {
     public function create_cohorts($numberofcohorts = 100) {
         for ($i = 0; $i < $numberofcohorts; $i++) {
             self::getDataGenerator()->create_cohort();
@@ -47,7 +45,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for get_instances() function calls.">
 
-    public function test_get_instances() {
+    public function test_get_instances(): void {
         global $SITE, $DB;
 
         // Test getting enrolment instances for the site course.
@@ -97,11 +95,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
             // Add a cohort enrolment instance to a course.
             try {
                 $wsenrolmentinstance = enrolcohort::add_instance([
-                    'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                    'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
                 ]);
             } catch (moodle_exception $exception) {
                 // This should never happen.
-                $this->fail('An exception was caught ('.get_class($exception).').');
+                $this->fail('An exception was caught (' . get_class($exception) . ').');
             }
 
             // The first call to add an enrolment instance should never be null.
@@ -119,7 +117,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
             try {
                 $enrolmentinstances = enrolcohort::get_instances(['id' => $courseid]);
             } catch (moodle_exception $exception) {
-                $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+                $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
             }
         }
     }
@@ -128,7 +126,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for delete_instance() function calls. ">
 
-    public function test_delete_instance() {
+    public function test_delete_instance(): void {
         $this->resetAfterTest(true);
 
         $wsenrolmentinstance  = null;
@@ -149,11 +147,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $wsenrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -180,7 +178,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         try {
             $wsdeleteinstanceresponse = enrolcohort::delete_instance(['id' => $enrolmentinstanceid]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $enrolmentinstances = enrol_get_instances($course->id, false);
@@ -202,7 +200,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for invalid function calls to update_instance().">
 
-    public function test_update_instance_enrol_instance_id_not_found() {
+    public function test_update_instance_enrol_instance_id_not_found(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -220,7 +218,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_update_instance_invalid_status() {
+    public function test_update_instance_invalid_status(): void {
         $this->resetAfterTest(true);
 
         $enrolmentinstance  = null;
@@ -241,11 +239,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -259,7 +257,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         try {
             // A status of 1000 is not a valid status.
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'status' => 1000
+                'id' => $enrolmentinstanceid, 'status' => 1000,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\invalid_status_exception', $exception);
@@ -269,7 +267,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_update_instance_role_not_found() {
+    public function test_update_instance_role_not_found(): void {
         $this->resetAfterTest(true);
 
         $enrolmentinstance  = null;
@@ -290,11 +288,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -307,7 +305,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'roleid' => 999
+                'id' => $enrolmentinstanceid, 'roleid' => 999,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\role_not_found_exception', $exception);
@@ -317,7 +315,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_update_instance_role_not_assignable() {
+    public function test_update_instance_role_not_assignable(): void {
         $this->resetAfterTest(true);
 
         $enrolmentinstance  = null;
@@ -338,11 +336,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -357,7 +355,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'roleid' => $unassignableroleid
+                'id' => $enrolmentinstanceid, 'roleid' => $unassignableroleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\role_not_assignable_at_context_exception', $exception);
@@ -367,7 +365,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_update_instance_group_not_found() {
+    public function test_update_instance_group_not_found(): void {
         $this->resetAfterTest(true);
 
         $enrolmentinstance  = null;
@@ -388,11 +386,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -405,7 +403,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'groupid' => 1234
+                'id' => $enrolmentinstanceid, 'groupid' => 1234,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\group_not_found_exception', $exception);
@@ -419,7 +417,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for update_instance() success.">
 
-    public function test_update_instance_nochange() {
+    public function test_update_instance_nochange(): void {
         $this->resetAfterTest(true);
 
         $enrolmentinstance  = null;
@@ -440,11 +438,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -457,10 +455,10 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid
+                'id' => $enrolmentinstanceid,
             ]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $this->assertArrayHasKey('id', $response);
@@ -476,7 +474,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertEquals(1, count($response['data']));
     }
 
-    public function test_update_instance() {
+    public function test_update_instance(): void {
         global $DB;
 
         $this->resetAfterTest(true);
@@ -499,11 +497,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         // Add a cohort enrolment instance to a course.
         try {
             $enrolmentinstance = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // The first call to add an enrolment instance should never be null.
@@ -519,10 +517,10 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'roleid' => $newroleid
+                'id' => $enrolmentinstanceid, 'roleid' => $newroleid,
             ]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $this->assertArrayHasKey('id', $response);
@@ -542,10 +540,10 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'groupid' => $newgroup->id
+                'id' => $enrolmentinstanceid, 'groupid' => $newgroup->id,
             ]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $this->assertArrayHasKey('id', $response);
@@ -566,10 +564,10 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'name' => $newname
+                'id' => $enrolmentinstanceid, 'name' => $newname,
             ]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $this->assertArrayHasKey('id', $response);
@@ -589,10 +587,10 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::update_instance([
-                'id' => $enrolmentinstanceid, 'status' => $newstatus
+                'id' => $enrolmentinstanceid, 'status' => $newstatus,
             ]);
         } catch (moodle_exception $exception) {
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         $this->assertArrayHasKey('id', $response);
@@ -616,7 +614,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for successful add_instance() function calls.">
 
-    public function test_add_instance_success_without_group() {
+    public function test_add_instance_success_without_group(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -635,11 +633,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // Validate the response code.
@@ -677,7 +675,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNotEquals(-1, $response['id']);
     }
 
-    public function test_add_instance_success_with_group_new() {
+    public function test_add_instance_success_with_group_new(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -697,11 +695,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // Validate the response code.
@@ -741,7 +739,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNotEquals(-1, $response['id']);
     }
 
-    public function test_add_instance_success_with_group_existing() {
+    public function test_add_instance_success_with_group_existing(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -762,11 +760,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid,
             ]);
         } catch (moodle_exception $exception) {
             // This should never happen.
-            $this->fail('An unexpected exception was caught ('.get_class($exception).').');
+            $this->fail('An unexpected exception was caught (' . get_class($exception) . ').');
         }
 
         // Validate the response code.
@@ -812,7 +810,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for checking call with groupid that doesn't belong to the course.">
 
-    public function test_add_instance_success_with_group_existing_invalid_course() {
+    public function test_add_instance_success_with_group_existing_invalid_course(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -834,7 +832,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\group_not_found_exception', $exception);
@@ -848,7 +846,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for add_instance() where role is already synced with role.">
 
-    public function test_add_instance_enrol_instance_already_synced_with_role() {
+    public function test_add_instance_enrol_instance_already_synced_with_role(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -868,11 +866,11 @@ class enrolcohort_test extends externallib_advanced_testcase {
         try {
             // Simulate an instance where a cohort enrolment instance would be added to a course that already has one.
             enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
 
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $expectedexceptionclass = 'local_ws_enrolcohort\exceptions\cohort_enrol_instance_already_synced_with_role_exception';
@@ -887,7 +885,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for add_instance() where status is invalid.">
 
-    public function test_add_instance_invalid_status() {
+    public function test_add_instance_invalid_status(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -910,7 +908,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'status' => $status
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'status' => $status,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\invalid_status_exception', $exception);
@@ -927,7 +925,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
     /**
      * Test calling the add_instance webservice function missing the required parameters.
      */
-    public function test_add_instance_missing_required_params() {
+    public function test_add_instance_missing_required_params(): void {
         // The invalid params to test with.
         $courseid   = 0;
         $roleid     = 0;
@@ -994,14 +992,14 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for add_instance() where something is not found.">
 
-    public function test_add_instance_course_not_found() {
+    public function test_add_instance_course_not_found(): void {
         $courseid = $cohortid = $roleid = 0;
 
         $response = null;
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\course_not_found_exception', $exception);
@@ -1011,7 +1009,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_add_instance_cohort_not_found() {
+    public function test_add_instance_cohort_not_found(): void {
         $this->resetAfterTest();
 
         $response = null;
@@ -1024,7 +1022,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\cohort_not_found_exception', $exception);
@@ -1034,7 +1032,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_add_instance_role_not_found() {
+    public function test_add_instance_role_not_found(): void {
         $this->resetAfterTest();
 
         $response = null;
@@ -1051,7 +1049,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\role_not_found_exception', $exception);
@@ -1061,7 +1059,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_add_instance_group_not_found() {
+    public function test_add_instance_group_not_found(): void {
         global $DB;
 
         $this->resetAfterTest();
@@ -1085,7 +1083,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\group_not_found_exception', $exception);
@@ -1099,7 +1097,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for add_instance() to a site course.">
 
-    public function test_add_instance_site_course() {
+    public function test_add_instance_site_course(): void {
         global $SITE;
 
         $this->resetAfterTest(true);
@@ -1114,7 +1112,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\invalid_course_exception', $exception);
@@ -1128,7 +1126,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
     /// <editor-fold desc="Tests for add_instance() for a cohort and role not available at context.">
 
-    public function test_add_instance_cohort_unavailable() {
+    public function test_add_instance_cohort_unavailable(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -1150,7 +1148,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\cohort_not_available_at_context_exception', $exception);
@@ -1160,7 +1158,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
         $this->assertNull($response);
     }
 
-    public function test_add_instance_role_unassignable() {
+    public function test_add_instance_role_unassignable(): void {
         $this->resetAfterTest(true);
 
         $response = null;
@@ -1182,7 +1180,7 @@ class enrolcohort_test extends externallib_advanced_testcase {
 
         try {
             $response = enrolcohort::add_instance([
-                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
+                'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid,
             ]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('local_ws_enrolcohort\exceptions\role_not_assignable_at_context_exception', $exception);

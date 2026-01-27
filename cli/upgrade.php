@@ -46,20 +46,20 @@ if (file_exists("{$CFG->dirroot}/local/locallib.php")) {
 raise_memory_limit(MEMORY_HUGE);
 
 // CLI options.
-list($options, $unrecognized) = cli_get_params(
+[$options, $unrecognized] = cli_get_params(
     // Long names.
     [
         'help' => false,
         'no-verbose' => false,
         'no-debugging' => false,
-        'print-logo' => false
+        'print-logo' => false,
     ],
     // Short names.
     [
         'h' => 'help',
         'nv' => 'no-verbose',
         'nd' => 'no-debugging',
-        'pl' => 'print-logo'
+        'pl' => 'print-logo',
     ]
 );
 
@@ -105,7 +105,7 @@ if (!$options['no-debugging']) {
 
 // Start output log.
 $trace = new \text_progress_trace();
-$trace->output(get_string('pluginname', 'local_ws_enrolcohort').' - This is a CLI script that will update webservice things.');
+$trace->output(get_string('pluginname', 'local_ws_enrolcohort') . ' - This is a CLI script that will update webservice things.');
 
 // Say some stuff like debugging is whatever.
 if (!$options['no-debugging']) {
@@ -131,7 +131,7 @@ $trace->output('Updating the webservices without doing the moodle updateyness.')
 external_update_descriptions('local_ws_enrolcohort');
 $pluginman = \core_plugin_manager::instance();
 upgrade_noncore(true);
-$trace->output('The webservice functions stuff should be updated.'.PHP_EOL);
+$trace->output('The webservice functions stuff should be updated.' . PHP_EOL);
 
 // Finish timing.
 $difftime = microtime_diff($starttime, microtime());

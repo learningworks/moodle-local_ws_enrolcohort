@@ -29,7 +29,6 @@ namespace local_ws_enrolcohort\responses;
 defined('MOODLE_INTERNAL') || die();
 
 abstract class response implements base {
-
     /**
      * @var int $id             The id of the object this is representing.
      */

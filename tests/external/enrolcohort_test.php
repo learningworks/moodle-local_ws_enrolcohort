@@ -14,6 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+
+namespace local_ws_enrolcohort\external;
+
+// No direct access.
+defined('MOODLE_INTERNAL') || die();
+
+global $CFG;
+
+require_once($CFG->dirroot.'/webservice/tests/helpers.php');
+require_once($CFG->dirroot . '/local/ws_enrolcohort/classes/external/enrolcohort.php');
+
+use externallib_advanced_testcase;
+use local_ws_enrolcohort\tools;
+use moodle_exception;
+
 /**
  * Cohort enrolment webservice tests for local_ws_enrolcohort.
  *
@@ -22,19 +38,7 @@
  * @copyright   2018 onwards, LearningWorks ltd
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// No direct access.
-defined('MOODLE_INTERNAL') || die();
-
-global $CFG;
-
-require_once($CFG->dirroot.'/webservice/tests/helpers.php');
-require_once($CFG->dirroot.'/local/ws_enrolcohort/externallib.php');
-
-use local_ws_enrolcohort\external\enrolcohort;
-use \local_ws_enrolcohort\tools;
-
-class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_testcase {
+class enrolcohort_test extends externallib_advanced_testcase {
     public function create_cohorts($numberofcohorts = 100) {
         for ($i = 0; $i < $numberofcohorts; $i++) {
             self::getDataGenerator()->create_cohort();
@@ -48,7 +52,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Test getting enrolment instances for the site course.
         try {
-            local_ws_enrolcohort_external::get_instances(['id' => $SITE->id]);
+            enrolcohort::get_instances(['id' => $SITE->id]);
             $this->fail('Expected a course_is_site_exception to be thrown.');
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\course_is_site_exception', $exception);
@@ -57,7 +61,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Test getting enrolment instances for acourse that doesn't exist.
         try {
-            local_ws_enrolcohort_external::get_instances(['id' => 999]);
+            enrolcohort::get_instances(['id' => 999]);
             $this->fail('Expected a course_not_found_exception to be thrown.');
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\course_not_found_exception', $exception);
@@ -92,7 +96,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
             // Add a cohort enrolment instance to a course.
             try {
-                $wsenrolmentinstance = local_ws_enrolcohort_external::add_instance([
+                $wsenrolmentinstance = enrolcohort::add_instance([
                     'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
                 ]);
             } catch (moodle_exception $exception) {
@@ -113,7 +117,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         foreach ($courseids as $key => $courseid) {
             try {
-                $enrolmentinstances = local_ws_enrolcohort_external::get_instances(['id' => $courseid]);
+                $enrolmentinstances = enrolcohort::get_instances(['id' => $courseid]);
             } catch (moodle_exception $exception) {
                 $this->fail('An unexpected exception was caught ('.get_class($exception).').');
             }
@@ -144,7 +148,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $wsenrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $wsenrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -165,7 +169,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Delete an enrolment instance that doesn't exist.
         try {
-            local_ws_enrolcohort_external::delete_instance(['id' => 118]);
+            enrolcohort::delete_instance(['id' => 118]);
             $this->fail('Expected a cohort_enrol_instance_not_found exception to be thrown.');
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\cohort_enrol_instance_not_found_exception', $exception);
@@ -174,7 +178,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Delete an enrolment instance that does exist.
         try {
-            $wsdeleteinstanceresponse = local_ws_enrolcohort_external::delete_instance(['id' => $enrolmentinstanceid]);
+            $wsdeleteinstanceresponse = enrolcohort::delete_instance(['id' => $enrolmentinstanceid]);
         } catch (moodle_exception $exception) {
             $this->fail('An unexpected exception was caught ('.get_class($exception).').');
         }
@@ -206,7 +210,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->setAdminUser();
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance(['id' => 1]);
+            $response = enrolcohort::update_instance(['id' => 1]);
         } catch (moodle_exception $exception) {
             // This should never happen.
             $this->assertInstanceOf('\local_ws_enrolcohort\exceptions\cohort_enrol_instance_not_found_exception', $exception);
@@ -236,7 +240,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -254,7 +258,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         try {
             // A status of 1000 is not a valid status.
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'status' => 1000
             ]);
         } catch (moodle_exception $exception) {
@@ -285,7 +289,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -302,7 +306,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $enrolmentinstanceid = $enrolmentinstance['id'];
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'roleid' => 999
             ]);
         } catch (moodle_exception $exception) {
@@ -333,7 +337,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -352,7 +356,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $unassignableroleid = self::getDataGenerator()->create_role(['archetype' => 'frontpage']);
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'roleid' => $unassignableroleid
             ]);
         } catch (moodle_exception $exception) {
@@ -383,7 +387,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -400,7 +404,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $enrolmentinstanceid = $enrolmentinstance['id'];
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'groupid' => 1234
             ]);
         } catch (moodle_exception $exception) {
@@ -435,7 +439,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -452,7 +456,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $enrolmentinstanceid = $enrolmentinstance['id'];
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid
             ]);
         } catch (moodle_exception $exception) {
@@ -494,7 +498,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         // Add a cohort enrolment instance to a course.
         try {
-            $enrolmentinstance = local_ws_enrolcohort_external::add_instance([
+            $enrolmentinstance = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -514,7 +518,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $newroleid = self::getDataGenerator()->create_role();
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'roleid' => $newroleid
             ]);
         } catch (moodle_exception $exception) {
@@ -537,7 +541,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $newgroup = self::getDataGenerator()->create_group(['courseid' => $courseid]);
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'groupid' => $newgroup->id
             ]);
         } catch (moodle_exception $exception) {
@@ -554,14 +558,14 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertEquals(tools::get_string('updateinstance:200'), $response['message']);
 
         // Check groupid.
-        $currentgroupid = $DB->get_field('enrol', local_ws_enrolcohort\external\enrolcohort::FIELD_GROUP, ['id' => $enrolmentinstanceid]);
+        $currentgroupid = $DB->get_field('enrol', enrolcohort::FIELD_GROUP, ['id' => $enrolmentinstanceid]);
         $this->assertEquals($currentgroupid, $newgroup->id);
 
         // Change the name.
         $newname = 'This is a brand new name';
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'name' => $newname
             ]);
         } catch (moodle_exception $exception) {
@@ -584,7 +588,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $newstatus = ENROL_INSTANCE_DISABLED;
 
         try {
-            $response = local_ws_enrolcohort_external::update_instance([
+            $response = enrolcohort::update_instance([
                 'id' => $enrolmentinstanceid, 'status' => $newstatus
             ]);
         } catch (moodle_exception $exception) {
@@ -630,7 +634,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohortid = $cohort->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -692,7 +696,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $groupid    = enrolcohort::COHORT_GROUP_CREATE_NEW;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
             ]);
         } catch (moodle_exception $exception) {
@@ -757,7 +761,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $groupid    = $group->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
             ]);
         } catch (moodle_exception $exception) {
@@ -829,7 +833,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $groupid    = $group->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
             ]);
         } catch (moodle_exception $exception) {
@@ -863,11 +867,11 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
 
         try {
             // Simulate an instance where a cohort enrolment instance would be added to a course that already has one.
-            local_ws_enrolcohort_external::add_instance([
+            enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
 
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -905,7 +909,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         self::create_cohorts();
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'status' => $status
             ]);
         } catch (moodle_exception $exception) {
@@ -932,7 +936,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $response = null;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['courseid' => $courseid]);
+            $response = enrolcohort::add_instance(['courseid' => $courseid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -941,7 +945,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertNull($response);
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['cohortid' => $cohortid]);
+            $response = enrolcohort::add_instance(['cohortid' => $cohortid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -950,7 +954,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertNull($response);
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['roleid' => $roleid]);
+            $response = enrolcohort::add_instance(['roleid' => $roleid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -959,7 +963,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertNull($response);
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['courseid' => $courseid, 'cohortid' => $cohortid]);
+            $response = enrolcohort::add_instance(['courseid' => $courseid, 'cohortid' => $cohortid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -968,7 +972,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertNull($response);
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['courseid' => $courseid, 'roleid' => $roleid]);
+            $response = enrolcohort::add_instance(['courseid' => $courseid, 'roleid' => $roleid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -977,7 +981,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $this->assertNull($response);
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance(['cohortid' => $cohortid, 'roleid' => $roleid]);
+            $response = enrolcohort::add_instance(['cohortid' => $cohortid, 'roleid' => $roleid]);
         } catch (moodle_exception $exception) {
             $this->assertInstanceOf('invalid_parameter_exception', $exception);
             $this->assertEquals('invalidparameter', $exception->errorcode);
@@ -996,7 +1000,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $response = null;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -1019,7 +1023,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $roleid     = 0;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -1046,7 +1050,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $roleid     = 0;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -1080,7 +1084,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $groupid    = 999;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid, 'groupid' => $groupid
             ]);
         } catch (moodle_exception $exception) {
@@ -1109,7 +1113,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohortid = $cohort->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -1145,7 +1149,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohortid = $cohort->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
@@ -1177,7 +1181,7 @@ class local_ws_enrolcohort_externallib_testcase extends externallib_advanced_tes
         $cohortid = $cohort->id;
 
         try {
-            $response = local_ws_enrolcohort_external::add_instance([
+            $response = enrolcohort::add_instance([
                 'courseid' => $courseid, 'cohortid' => $cohortid, 'roleid' => $roleid
             ]);
         } catch (moodle_exception $exception) {
